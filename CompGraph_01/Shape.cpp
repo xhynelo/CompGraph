@@ -63,3 +63,12 @@ void Shape::move(int x, int y)
 		vertices[i * 4 + 1] += y;
 	}
 }
+
+void Shape::printShape(HDC hdc)
+{
+	MoveToEx(hdc, this->x(0), this->y(0), NULL);
+	for (int i = 1; i < this->getV(); i++) {
+		LineTo(hdc, this->x(i), this->y(i));
+	}
+	LineTo(hdc, this->x(0), this->y(0));
+}

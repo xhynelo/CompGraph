@@ -1,4 +1,5 @@
 #pragma once
+#include <windef.h>
 class Shape
 {
 	int *vertices = NULL, *edges = NULL, *faces = NULL;
@@ -15,4 +16,5 @@ class Shape
 		void scale(int n);
 		void addVertex(int x, int y);
 		void move(int x, int y);
+		void printShape(HDC hdc);
 };
