@@ -87,16 +87,20 @@ void Shape::move(int x, int y)
 
 void Shape::printShape(HDC hdc)
 {
-	//MoveToEx(hdc, this->x(0), this->y(0), NULL);
-	
-	//for (int i = 1; i < this->getV(); i++) {
-	//	LineTo(hdc, this->x(i), this->y(i));
-	//}
-	//LineTo(hdc, this->x(0), this->y(0));
+	/*MoveToEx(hdc, this->x(0), this->y(0), NULL);	
+	for (int i = 1; i < this->getV(); i++) {
+		LineTo(hdc, this->x(i), this->y(i));
+	}
+	LineTo(hdc, this->x(0), this->y(0));*/
 	for (auto edge = edges.begin(); edge != edges.end(); ++edge) {
 		MoveToEx(hdc, this->x(edge->first), this->y(edge->first), NULL);
 		LineTo(hdc, this->x(edge->second), this->y(edge->second));
 	}
+}
+
+void Shape::metaShape()
+{
+	cout << "oi, como vai?" << endl;
 }
 
 void Shape::addEdge(int v1, int v2)

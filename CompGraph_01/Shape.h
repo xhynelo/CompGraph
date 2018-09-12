@@ -40,6 +40,7 @@ class Shape
 		void addVertex(Vertex v);
 		void move(int x, int y);
 		void printShape(HDC hdc);
+		void metaShape();
 		void addEdge(int v1, int v2);
 		void readShape(string name);
 };
