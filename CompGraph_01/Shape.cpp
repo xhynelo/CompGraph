@@ -1,8 +1,6 @@
 #include "stdafx.h"
 #include "Shape.h"
 
-#include "iostream"
-
 
 Vertex::Vertex(int mX, int mY) : x(mX), y(mY), z(0), scale(1) {}
 
@@ -101,6 +99,7 @@ void Shape::printShape(HDC hdc)
 void Shape::metaShape()
 {
 	cout << "oi, como vai?" << endl;
+	printf("Hello, world\n");
 }
 
 void Shape::addEdge(int v1, int v2)
