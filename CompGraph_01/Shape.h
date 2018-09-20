@@ -13,6 +13,8 @@ struct Vertex
 	int z = 0;
 	int scale = 1;
 
+	
+
 	Vertex(int mX, int mY);
 	Vertex();
 	int operator[](int i);
@@ -27,6 +29,8 @@ class Shape
 	vector<pair<int, int>> edges;
 	//number of elements on the above arrays
 	int v = 0, e = 0, f = 0;
+	//int XDmin = -1, YDmin = -1, XDMAX = 0, YDMAX = 0;
+	int vXmin = -1, vYmin = -1, vXMAX = -1, vYMAX = -1;
 
 	public:
 		Shape();
@@ -43,4 +47,5 @@ class Shape
 		void metaShape();
 		void addEdge(int v1, int v2);
 		void readShape(string name);
+		void remaping(HWND hWnd, HDC hdc);
 };

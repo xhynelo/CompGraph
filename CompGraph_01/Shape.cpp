@@ -1,6 +1,10 @@
 #include "stdafx.h"
 #include "Shape.h"
 
+#define XuMin 0
+#define YuMin 0
+#define XuMax 100
+#define YuMax 100
 
 Vertex::Vertex(int mX, int mY) : x(mX), y(mY), z(0), scale(1) {}
 
@@ -65,6 +69,10 @@ void Shape::scale(int n)
 
 void Shape::addVertex(int x, int y)
 {
+	if (vXmin < 0 || x < this->x(vXmin)) vXmin = v;
+	if (vYmin < 0 || y < this->y(vYmin)) vYmin = v;
+	if (vXMAX < 0 || x > this->x(vXMAX)) vXMAX = v;
+	if (vYMAX < 0 || y > this->y(vYMAX)) vYMAX = v;
 	addVertex(Vertex(x, y));
 }
 
@@ -138,5 +146,37 @@ void Shape::readShape(string name)
 		ifs >> s;
 		scale(s);
 		ifs.close();
+	}
+}
+
+void Shape::remaping(HWND hWnd, HDC hdc)
+{
+	int Xumin = 0, Yumin = 0, XuMAX = 100, YuMAX = 100;
+	//int XDmin = this->x(vXmin), YDmin = this->y(vYmin), XDMAX = this->x(vXMAX), YDMAX = this->y(vYMAX);
+	int XDmin = 0, YDmin = 0, XDMAX, YDMAX;
+	int Xu, Yu;
+	int width, height;
+	RECT rect;
+	if (GetWindowRect(hWnd, &rect))
+	{
+		width = rect.right - rect.left;
+		height = rect.bottom - rect.top;
+	}
+	//*
+	XDMAX = width;
+	YDMAX = height;
+	//*/
+	/*
+	(3,1)->(9,9)
+	XD = [(Xu - Xumin)(XDMAX - XDmin) / (XuMAX - Xumin)] + XDmin)
+	YD = [(Yu - Yumin)(YDMAX - YDmin) / (YuMAX - Yumin)] + YDmin)
+	*/
+	for (auto edge = edges.begin(); edge != edges.end(); ++edge) {
+		Xu = this->x(edge->first);
+		Yu = this->y(edge->first);
+		MoveToEx(hdc, (Xu - Xumin)*(XDMAX - XDmin) / (XuMAX - Xumin) + XDmin, (Yu - Yumin)*(YDMAX - YDmin) / (YuMAX - Yumin) + YDmin, NULL);
+		Xu = this->x(edge->second);
+		Yu = this->y(edge->second);
+		LineTo(hdc, (Xu - Xumin)*(XDMAX - XDmin) / (XuMAX - Xumin) + XDmin, (Yu - Yumin)*(YDMAX - YDmin) / (YuMAX - Yumin) + YDmin);
 	}
 }
