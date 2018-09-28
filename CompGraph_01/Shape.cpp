@@ -41,6 +41,12 @@ Shape::Shape()
 	v = 0;
 	e = 0;
 	f = 0;
+	matrix = {
+			{1.0, 0.0, 0.0, 0.0},
+			{0.0, 1.0, 0.0, 0.0},
+			{0.0, 0.0, 1.0, 0.0},
+			{0.0, 0.0, 0.0, 1.0}
+	};
 }
 
 int Shape::x(int n)
@@ -154,7 +160,7 @@ void Shape::remaping(HWND hWnd, HDC hdc)
 	int Xumin = 0, Yumin = 0, XuMAX = 100, YuMAX = 100;
 	//int XDmin = this->x(vXmin), YDmin = this->y(vYmin), XDMAX = this->x(vXMAX), YDMAX = this->y(vYMAX);
 	int XDmin = 0, YDmin = 0, XDMAX, YDMAX;
-	int Xu, Yu;
+	int Xu, Yu, scalexy, newScale;
 	int width, height;
 	RECT rect;
 	if (GetWindowRect(hWnd, &rect))
@@ -172,11 +178,30 @@ void Shape::remaping(HWND hWnd, HDC hdc)
 	YD = [(Yu - Yumin)(YDMAX - YDmin) / (YuMAX - Yumin)] + YDmin)
 	*/
 	for (auto edge = edges.begin(); edge != edges.end(); ++edge) {
+		//scalexy = vertices[0].scale;
+		//newScale = (scalexy * 100) / XDMAX;
+		//scale(newScale);
 		Xu = this->x(edge->first);
 		Yu = this->y(edge->first);
 		MoveToEx(hdc, (Xu - Xumin)*(XDMAX - XDmin) / (XuMAX - Xumin) + XDmin, (Yu - Yumin)*(YDMAX - YDmin) / (YuMAX - Yumin) + YDmin, NULL);
 		Xu = this->x(edge->second);
 		Yu = this->y(edge->second);
 		LineTo(hdc, (Xu - Xumin)*(XDMAX - XDmin) / (XuMAX - Xumin) + XDmin, (Yu - Yumin)*(YDMAX - YDmin) / (YuMAX - Yumin) + YDmin);
+	}
+}
+
+void Shape::matrixMult(vector<vector<float>> mat)
+{
+	vector<vector<float>> matrixAux = this->matrix;
+	float sum;
+	int i, j, k;
+	for (i=0; i < 4; i++) {
+		for (j=0; j < 4; j++) {
+			sum = 0;
+			for (k = 0; k < 4; k++) {
+				sum += matrixAux[j][k] * mat[k][j];
+			}
+			matrix[i][j] = sum;
+		}
 	}
 }

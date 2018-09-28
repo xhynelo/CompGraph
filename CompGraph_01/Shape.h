@@ -38,6 +38,8 @@ class Shape
 		int x(int n);
 		int y(int n);
 		int getV();
+		vector<vector<float>> matrix;
+		
 
 		void scale(int n);
 		void addVertex(int x, int y);
@@ -48,4 +50,5 @@ class Shape
 		void addEdge(int v1, int v2);
 		void readShape(string name);
 		void remaping(HWND hWnd, HDC hdc);
+		void matrixMult(vector<vector<float>> mat);
 };
