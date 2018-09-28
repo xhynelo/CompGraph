@@ -10,15 +10,13 @@ Vertex::Vertex(int mX, int mY) : x(mX), y(mY), z(0), scale(1) {}
 
 Vertex::Vertex() {}
 
-int Vertex::operator[](int i) {
+int& Vertex::operator[](int i) {
 	switch (i)
 	{
 	case 0: return x;
 	case 1: return y;
 	case 2: return z;
 	case 3: return scale;
-	default:
-		return -1;
 	}
 }
 
@@ -52,13 +50,13 @@ Shape::Shape()
 int Shape::x(int n)
 {
 	if (v <= n) return -1;
-	return vertices[n].x * vertices[n].scale;
+	return verticesPrint[n].x * vertices[n].scale;
 }
 
 int Shape::y(int n)
 {
 	if (n >= v) return -1;
-	return vertices[n].y * vertices[n].scale;
+	return verticesPrint[n].y * vertices[n].scale;
 }
 
 int Shape::getV()
@@ -85,6 +83,7 @@ void Shape::addVertex(int x, int y)
 void Shape::addVertex(Vertex v)
 {
 	vertices.push_back(v);
+	verticesPrint.push_back(v);
 	this->v++;
 }
 
@@ -195,13 +194,70 @@ void Shape::matrixMult(vector<vector<float>> mat)
 	vector<vector<float>> matrixAux = this->matrix;
 	float sum;
 	int i, j, k;
-	for (i=0; i < 4; i++) {
-		for (j=0; j < 4; j++) {
+	for (j = 0; j < 4; j++) {
+		for (i = 0; i < 4; i++) {
 			sum = 0;
 			for (k = 0; k < 4; k++) {
-				sum += matrixAux[j][k] * mat[k][j];
+				sum += matrixAux[j][k] * mat[k][i];
+			}
+			matrix[j][i] = sum;
+		}
+	}
+}
+/*
+
+void Shape::matrixMult(vector<vector<float>> mat)
+{
+	vector<vector<float>> matrixAux = this->matrix;
+	float sum;
+	int i, j, k;
+	for (j = 0; j < 4; j++) {
+		for (i = 0; i < 4; i++) {
+			sum = 0;
+			for (k = 0; k < 4; k++) {
+				sum += matrixAux[j][k] * mat[k][i];
 			}
 			matrix[i][j] = sum;
 		}
 	}
+}
+//*/
+void Shape::tranform()
+{
+	vector<Vertex> matrixAux = vertices;
+	cout << "matrix" << endl;
+	for (auto it = matrix.begin(); it != matrix.end(); it++) {
+		for (auto it2 = it->begin(); it2 != it->end(); it2++) {
+			cout << *it2 << " ";
+		}
+		cout << endl;
+	}
+	cout << ";" << endl;
+	cout << "verticesPrint" << endl;
+	for (auto it = verticesPrint.begin(); it != verticesPrint.end(); it++) {
+		cout << *it << endl;
+	}
+	cout << ";" << endl;
+	float sum;
+	int i, j, k;
+	for (j = 0; j < this->v; j++) {
+		for (i = 0; i < 4; i++) {
+			sum = 0;
+			for (k = 0; k < 4; k++) {
+				if (k < 3) {
+					sum += matrixAux[j][k] * matrix[k][i];
+				}
+				else {
+					sum += (matrixAux[j][k] / matrixAux[j][k]) * matrix[k][i];
+				}
+			}
+			Vertex &v = verticesPrint[j];
+			v[i] = sum;
+		}
+	}
+	cout << "verticesPrint" << endl;
+	for (auto it = verticesPrint.begin(); it != verticesPrint.end(); it++) {
+		cout << *it << endl;
+	}
+	cout << ";" << endl;
 }

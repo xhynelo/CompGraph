@@ -17,7 +17,7 @@ struct Vertex
 
 	Vertex(int mX, int mY);
 	Vertex();
-	int operator[](int i);
+	int& operator[](int i);
 	friend std::istream& operator>>(std::istream &is, Vertex &vertex);
 	friend std::ostream& operator<<(std::ostream &is, Vertex &vertex);
 };
@@ -26,6 +26,7 @@ class Shape
 {
 	int *faces = NULL;
 	vector<Vertex> vertices;
+	vector<Vertex> verticesPrint;
 	vector<pair<int, int>> edges;
 	//number of elements on the above arrays
 	int v = 0, e = 0, f = 0;
@@ -51,4 +52,5 @@ class Shape
 		void readShape(string name);
 		void remaping(HWND hWnd, HDC hdc);
 		void matrixMult(vector<vector<float>> mat);
+		void tranform();
 };
