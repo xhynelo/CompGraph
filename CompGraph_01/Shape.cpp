@@ -96,7 +96,7 @@ void Shape::move(int x, int y)
 	}
 }
 
-void Shape::printShape(HDC hdc)
+void Shape::printShape(SDL_Renderer* renderer)
 {
 	/*MoveToEx(hdc, this->x(0), this->y(0), NULL);	
 	for (int i = 1; i < this->getV(); i++) {
@@ -104,8 +104,12 @@ void Shape::printShape(HDC hdc)
 	}
 	LineTo(hdc, this->x(0), this->y(0));*/
 	for (auto edge = edges.begin(); edge != edges.end(); ++edge) {
-		MoveToEx(hdc, this->x(edge->first), this->y(edge->first), NULL);
-		LineTo(hdc, this->x(edge->second), this->y(edge->second));
+		SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
+		SDL_RenderDrawLine(
+			renderer, 
+			this->x(edge->first), this->y(edge->first),
+			this->x(edge->second), this->y(edge->second)
+		);
 	}
 }
 

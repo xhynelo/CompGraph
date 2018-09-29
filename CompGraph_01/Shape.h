@@ -3,6 +3,7 @@
 #include <vector>
 #include <iostream>
 #include <fstream>
+#include <SDL.h>
 
 using namespace std;
 
@@ -46,7 +47,7 @@ class Shape
 		void addVertex(int x, int y);
 		void addVertex(Vertex v);
 		void move(int x, int y);
-		void printShape(HDC hdc);
+		void printShape(SDL_Renderer* renderer);
 		void metaShape();
 		void addEdge(int v1, int v2);
 		void readShape(string name);
