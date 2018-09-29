@@ -137,7 +137,7 @@ void Shape::readShape(string name)
 		for (int i = 0; i < v_aux; i++) {
 			Vertex vertex;
 			ifs >> vertex;
-			cout << vertex << endl;
+			//cout << vertex << endl;
 			addVertex(vertex);
 		}
 		int e_aux;
@@ -225,19 +225,19 @@ void Shape::matrixMult(vector<vector<float>> mat)
 void Shape::tranform()
 {
 	vector<Vertex> matrixAux = vertices;
-	cout << "matrix" << endl;
+	//cout << "matrix" << endl;
 	for (auto it = matrix.begin(); it != matrix.end(); it++) {
 		for (auto it2 = it->begin(); it2 != it->end(); it2++) {
-			cout << *it2 << " ";
+			//cout << *it2 << " ";
 		}
-		cout << endl;
+		//cout << endl;
 	}
-	cout << ";" << endl;
-	cout << "verticesPrint" << endl;
+	//cout << ";" << endl;
+	//cout << "verticesPrint" << endl;
 	for (auto it = verticesPrint.begin(); it != verticesPrint.end(); it++) {
-		cout << *it << endl;
+		//cout << *it << endl;
 	}
-	cout << ";" << endl;
+	//cout << ";" << endl;
 	float sum;
 	int i, j, k;
 	for (j = 0; j < this->v; j++) {
@@ -255,9 +255,9 @@ void Shape::tranform()
 			v[i] = sum;
 		}
 	}
-	cout << "verticesPrint" << endl;
+	//cout << "verticesPrint" << endl;
 	for (auto it = verticesPrint.begin(); it != verticesPrint.end(); it++) {
-		cout << *it << endl;
+		//cout << *it << endl;
 	}
-	cout << ";" << endl;
+	//cout << ";" << endl;
 }
