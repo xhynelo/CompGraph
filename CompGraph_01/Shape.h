@@ -16,7 +16,7 @@ struct Vertex
 
 	
 
-	Vertex(int mX, int mY);
+	Vertex(double mX, double mY);
 	Vertex();
 	double& operator[](int i);
 	friend std::istream& operator>>(std::istream &is, Vertex &vertex);
@@ -35,7 +35,8 @@ class Shape
 
 	Vertex position;
 	int pivot = 0;
-	int height, width, invertX = 0, invertY = 0;
+	double height, width;
+	int invertX = 0, invertY = 0;
 
 	public:
 		Shape();
@@ -49,8 +50,8 @@ class Shape
 		void scale(double n);
 		void addVertex(double x, double y);
 		void addVertex(Vertex v);
-		void printShape(SDL_Renderer* renderer);
-		void metaShape();
+		void printShape(SDL_Renderer* renderer, int width, int height);
+		void metaShape(SDL_Renderer* renderer, int width, int height);
 		void addEdge(int v1, int v2);
 		void readShape(string name);
 		void remaping(double newWidth, double newHeight);

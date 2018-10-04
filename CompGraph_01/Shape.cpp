@@ -1,7 +1,9 @@
 #include "stdafx.h"
 #include "Shape.h"
 
-Vertex::Vertex(int mX, int mY) : x(mX), y(mY), z(0), scale(1) {}
+#include <cmath>
+
+Vertex::Vertex(double mX, double mY) : x(mX), y(mY), z(0), scale(1) {}
 
 Vertex::Vertex() {}
 
@@ -11,7 +13,7 @@ double& Vertex::operator[](int i) {
 	case 0: return x;
 	case 1: return y;
 	case 2: return z;
-	case 3: return scale;
+	default: return scale;
 	}
 }
 
@@ -84,32 +86,47 @@ void Shape::addVertex(double x, double y)
 void Shape::addVertex(Vertex v)
 {
 	if (!this->v) position = v;
-	else {
-		v.x = v.x - position.x;
-		v.y = v.y - position.y;
-	}
+	v.x = v.x - position.x;
+	v.y = v.y - position.y;
+	
 	vertices.push_back(v);
 	this->v++;
 }
 
-void Shape::printShape(SDL_Renderer* renderer)
+void Shape::printShape(SDL_Renderer* renderer, int width, int height)
 {
 	int w, h;
+	int Xdi, Xdf, Ydi, Ydf;
 	SDL_GetRendererOutputSize(renderer, &w, &h);
+	//cout << "printShape" << endl;
 	for (auto edge = edges.begin(); edge != edges.end(); ++edge) {
+		Xdi = (int) (((this->x(edge->first) + position.x * position.scale) * width) / this->width);
+		Ydi = (int) (((this->y(edge->first) + position.y * position.scale) * -height) / this->height + height);
+		Xdf = (int) (((this->x(edge->second) + position.x * position.scale) * width) / this->width);
+		Ydf = (int) (((this->y(edge->second) + position.y * position.scale) * -height) / this->height + height);
+		//cout << Xdi << " " << Ydi << " " << Xdf << " " << Ydf << endl;
 		SDL_SetRenderDrawColor(renderer, 255, 0, 0, SDL_ALPHA_OPAQUE); // ... (renderer, r, g, b, alpha)
 		SDL_RenderDrawLine(
 			renderer,
-			w*(this->x(edge->first) + position.x) / width - invertX * w, h*(this->y(edge->first) + position.y) / height - invertY * h,
-			w*(this->x(edge->second) + position.x) / width - invertX * w, h*(this->y(edge->second) + position.y) / height - invertY * h
+			Xdi, Ydi,
+			Xdf, Ydf
 		);
 	}
 }
 
-void Shape::metaShape()
+void Shape::metaShape(SDL_Renderer* renderer, int width, int height)
 {
+	
+	int Xdi, Ydi;
 	for (int i = 0; i < v; i++) {
-		cout << i << "x:" << vertices[i].x << " y:" << vertices[i].y << endl;
+		Xdi = (int)(((this->x(i) + position.x * position.scale) * width) / this->width);
+		Ydi = (int)(((this->y(i) + position.y * position.scale) * -height) / this->height + height);
+		SDL_SetRenderDrawColor(renderer, 255/v * i, 255 / v * i, 255 / v * i, SDL_ALPHA_OPAQUE); // ... (renderer, r, g, b, alpha)
+		SDL_Rect rect = { Xdi - 2, Ydi - 2, 4, 4 };
+		SDL_RenderFillRect(renderer, &rect);
+		cout << i << "x:" << vertices[i].x << " y:" << vertices[i].y << " s:" << vertices[i].scale << endl;
+		cout << i << "xd:" << Xdi << " yd:" << Ydi << endl;
+
 	}
 }
 
@@ -151,7 +168,7 @@ void Shape::readShape(string name)
 		ifs.close();
 	}
 }
-
+/*
 void Shape::remaping(double newWidth, double newHeight)
 {
 	if (newWidth / width < 0) invertX = 1 - invertX;
@@ -166,7 +183,7 @@ void Shape::remaping(double newWidth, double newHeight)
 	width = newWidth * (1 - 2 * invertX);
 	height = newHeight * (1 - 2 * invertY);
 }
-
+//*/
 void Shape::setPosition(double x, double y)
 {
 	position.x = x;
@@ -236,5 +253,32 @@ void Shape::translade(double x, double y)
 {
 	position.x += x;
 	position.y += y;
+}
+void Shape::rotate(double theta)
+{
+	theta = theta / 180.0 * M_PI;
+	cout << theta << endl;
+	vector<vector<double>> rotate = {
+		{cos(theta), sin(theta), 0, 0 },
+		{-sin(theta), cos(theta), 0, 0},
+		{0, 0, 1, 0},
+		{0, 0, 0, 1}
+	};
+	cout << "sqrt(theta): " << sqrt(theta) << endl;
+	Vertex aux;
+	double sum;
+	int i, j, k;
+	for (j = 0; j < this->v; j++) {
+		for (i = 0; i < 4; i++) {
+			sum = 0;
+			for (k = 0; k < 4; k++) {
+				sum += vertices[j][k] * rotate[k][i];
+			}
+			aux[i] = sum;
+		}
+		vertices[j] = aux;
+		cout << aux << endl;
+	}
+
 }
 //*/
