@@ -1,16 +1,11 @@
 #include "stdafx.h"
 #include "Shape.h"
 
-#define XuMin 0
-#define YuMin 0
-#define XuMax 100
-#define YuMax 100
-
 Vertex::Vertex(int mX, int mY) : x(mX), y(mY), z(0), scale(1) {}
 
 Vertex::Vertex() {}
 
-int& Vertex::operator[](int i) {
+double& Vertex::operator[](int i) {
 	switch (i)
 	{
 	case 0: return x;
@@ -47,31 +42,37 @@ Shape::Shape()
 	};
 }
 
-int Shape::x(int n)
+double Shape::x(int n)
 {
 	if (v <= n) return -1;
-	return verticesPrint[n].x * vertices[n].scale;
+	return vertices[n].x * vertices[n].scale;
 }
 
-int Shape::y(int n)
+double Shape::y(int n)
 {
 	if (n >= v) return -1;
-	return verticesPrint[n].y * vertices[n].scale;
+	return vertices[n].y * vertices[n].scale;
 }
 
-int Shape::getV()
+double Shape::getV()
 {
 	return v;
 }
 
-void Shape::scale(int n)
+void Shape::setSRU(double x, double y)
+{
+	height = y;
+	width = x;
+}
+
+void Shape::scale(double n)
 {
 	for (int i = 0; i < v; i++) {
 		vertices[i].scale = n;
 	}
 }
 
-void Shape::addVertex(int x, int y)
+void Shape::addVertex(double x, double y)
 {
 	if (vXmin < 0 || x < this->x(vXmin)) vXmin = v;
 	if (vYmin < 0 || y < this->y(vYmin)) vYmin = v;
@@ -82,41 +83,34 @@ void Shape::addVertex(int x, int y)
 
 void Shape::addVertex(Vertex v)
 {
-	vertices.push_back(v);
-	verticesPrint.push_back(v);
-	this->v++;
-}
-
-
-void Shape::move(int x, int y)
-{
-	for (int i = 0; i < v; i++) {
-		vertices[i].x += x;
-		vertices[i].y += y;
+	if (!this->v) position = v;
+	else {
+		v.x = v.x - position.x;
+		v.y = v.y - position.y;
 	}
+	vertices.push_back(v);
+	this->v++;
 }
 
 void Shape::printShape(SDL_Renderer* renderer)
 {
-	/*MoveToEx(hdc, this->x(0), this->y(0), NULL);	
-	for (int i = 1; i < this->getV(); i++) {
-		LineTo(hdc, this->x(i), this->y(i));
-	}
-	LineTo(hdc, this->x(0), this->y(0));*/
+	int w, h;
+	SDL_GetRendererOutputSize(renderer, &w, &h);
 	for (auto edge = edges.begin(); edge != edges.end(); ++edge) {
-		SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
+		SDL_SetRenderDrawColor(renderer, 255, 0, 0, SDL_ALPHA_OPAQUE); // ... (renderer, r, g, b, alpha)
 		SDL_RenderDrawLine(
-			renderer, 
-			this->x(edge->first), this->y(edge->first),
-			this->x(edge->second), this->y(edge->second)
+			renderer,
+			w*(this->x(edge->first) + position.x) / width - invertX * w, h*(this->y(edge->first) + position.y) / height - invertY * h,
+			w*(this->x(edge->second) + position.x) / width - invertX * w, h*(this->y(edge->second) + position.y) / height - invertY * h
 		);
 	}
 }
 
 void Shape::metaShape()
 {
-	cout << "oi, como vai?" << endl;
-	printf("Hello, world\n");
+	for (int i = 0; i < v; i++) {
+		cout << i << "x:" << vertices[i].x << " y:" << vertices[i].y << endl;
+	}
 }
 
 void Shape::addEdge(int v1, int v2)
@@ -158,74 +152,45 @@ void Shape::readShape(string name)
 	}
 }
 
-void Shape::remaping(HWND hWnd, HDC hdc)
+void Shape::remaping(double newWidth, double newHeight)
 {
-	int Xumin = 0, Yumin = 0, XuMAX = 100, YuMAX = 100;
-	//int XDmin = this->x(vXmin), YDmin = this->y(vYmin), XDMAX = this->x(vXMAX), YDMAX = this->y(vYMAX);
-	int XDmin = 0, YDmin = 0, XDMAX, YDMAX;
-	int Xu, Yu, scalexy, newScale;
-	int width, height;
-	RECT rect;
-	if (GetWindowRect(hWnd, &rect))
-	{
-		width = rect.right - rect.left;
-		height = rect.bottom - rect.top;
+	if (newWidth / width < 0) invertX = 1 - invertX;
+	if (newHeight / height < 0) invertY = 1 - invertY;
+	for (int i = 0; i < v; i++) {
+		vertices[i].x = newWidth * ((vertices[i].x) / width - invertX / vertices[i].scale);
+		vertices[i].y = newHeight * ((vertices[i].y) / height - invertY / vertices[i].scale);
 	}
-	//*
-	XDMAX = width;
-	YDMAX = height;
-	//*/
-	/*
-	(3,1)->(9,9)
-	XD = [(Xu - Xumin)(XDMAX - XDmin) / (XuMAX - Xumin)] + XDmin)
-	YD = [(Yu - Yumin)(YDMAX - YDmin) / (YuMAX - Yumin)] + YDmin)
-	*/
-	for (auto edge = edges.begin(); edge != edges.end(); ++edge) {
-		//scalexy = vertices[0].scale;
-		//newScale = (scalexy * 100) / XDMAX;
-		//scale(newScale);
-		Xu = this->x(edge->first);
-		Yu = this->y(edge->first);
-		MoveToEx(hdc, (Xu - Xumin)*(XDMAX - XDmin) / (XuMAX - Xumin) + XDmin, (Yu - Yumin)*(YDMAX - YDmin) / (YuMAX - Yumin) + YDmin, NULL);
-		Xu = this->x(edge->second);
-		Yu = this->y(edge->second);
-		LineTo(hdc, (Xu - Xumin)*(XDMAX - XDmin) / (XuMAX - Xumin) + XDmin, (Yu - Yumin)*(YDMAX - YDmin) / (YuMAX - Yumin) + YDmin);
-	}
+	position.x = newWidth * (position.x / width - invertX);
+	position.y = newHeight * (position.y / height - invertY);
+
+	width = newWidth * (1 - 2 * invertX);
+	height = newHeight * (1 - 2 * invertY);
 }
 
-void Shape::matrixMult(vector<vector<float>> mat)
+void Shape::setPosition(double x, double y)
 {
-	vector<vector<float>> matrixAux = this->matrix;
-	float sum;
+	position.x = x;
+	position.y = y;
+}
+
+vector<vector<double>> Shape::matrixMult(vector<vector<double>> mat1, vector<vector<double>> mat2)
+{
+	vector<vector<double>> matrix = mat1;
+	double sum;
 	int i, j, k;
 	for (j = 0; j < 4; j++) {
 		for (i = 0; i < 4; i++) {
 			sum = 0;
 			for (k = 0; k < 4; k++) {
-				sum += matrixAux[j][k] * mat[k][i];
+				sum += mat1[j][k] * mat2[k][i];
 			}
 			matrix[j][i] = sum;
 		}
 	}
+	return matrix;
 }
-/*
 
-void Shape::matrixMult(vector<vector<float>> mat)
-{
-	vector<vector<float>> matrixAux = this->matrix;
-	float sum;
-	int i, j, k;
-	for (j = 0; j < 4; j++) {
-		for (i = 0; i < 4; i++) {
-			sum = 0;
-			for (k = 0; k < 4; k++) {
-				sum += matrixAux[j][k] * mat[k][i];
-			}
-			matrix[i][j] = sum;
-		}
-	}
-}
-//*/
+/*
 void Shape::tranform()
 {
 	vector<Vertex> matrixAux = vertices;
@@ -242,7 +207,7 @@ void Shape::tranform()
 		//cout << *it << endl;
 	}
 	//cout << ";" << endl;
-	float sum;
+	double sum;
 	int i, j, k;
 	for (j = 0; j < this->v; j++) {
 		for (i = 0; i < 4; i++) {
@@ -265,3 +230,11 @@ void Shape::tranform()
 	}
 	//cout << ";" << endl;
 }
+//*/
+//*
+void Shape::translade(double x, double y)
+{
+	position.x += x;
+	position.y += y;
+}
+//*/
