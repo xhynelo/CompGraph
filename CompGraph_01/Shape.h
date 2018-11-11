@@ -43,6 +43,7 @@ class Shape
 
 		double x(int n);
 		double y(int n);
+		double z(int n);
 		double getV();
 		vector<vector<double>> matrix;
 		
@@ -60,6 +61,8 @@ class Shape
 		void rotate(double theta);
 		void rotate(double thetaX, double thetaY, double thetaZ);
 		void setPosition(double x, double y);
+		void slide(double tam);
+		void projection(double theta);
 
 		vector<vector<double>> matrixMult(vector<vector<double>> mat1, vector<vector<double>> mat2);
 

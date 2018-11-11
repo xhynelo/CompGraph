@@ -56,6 +56,12 @@ double Shape::y(int n)
 	return vertices[n].y * vertices[n].scale;
 }
 
+double Shape::z(int n)
+{
+	if (n >= v) return -1;
+	return vertices[n].z * vertices[n].scale;
+}
+
 double Shape::getV()
 {
 	return v;
@@ -167,6 +173,19 @@ void Shape::readShape(string name)
 		scale(s);
 		ifs.close();
 	}
+}
+
+void Shape::slide(double tam) {
+	int i, ver = v;
+	for (i = 0; i < v; i++) {
+		addVertex(vertices[i].x, vertices[i].y);
+		vertices[i+v].z = tam;
+	}
+}
+
+void projection(double theta) {
+	double cosT = cos(theta), sinT = sin(theta);
+
 }
 /*
 void Shape::remaping(double newWidth, double newHeight)
