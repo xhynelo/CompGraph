@@ -251,6 +251,11 @@ vector<vector<double>> Shape::matrixMult(vector<vector<double>> mat1, vector<vec
 	return matrix;
 }
 
+void visibility()
+{
+
+}
+
 /*
 void Shape::tranform()
 {

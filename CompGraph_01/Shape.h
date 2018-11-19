@@ -7,6 +7,16 @@
 
 using namespace std;
 
+
+struct Face
+{
+	double color;
+	vector<int> edges;
+	bool isVisible;
+
+	
+};
+
 struct Vertex
 {
 	double x = 0;
@@ -25,7 +35,7 @@ struct Vertex
 
 class Shape
 {
-	int *faces = NULL;
+	vector<Face> faces;
 	vector<Vertex> vertices;
 	vector<pair<int, int>> edges;
 	//number of elements on the above arrays
@@ -63,6 +73,7 @@ class Shape
 		void setPosition(double x, double y);
 		void slide(double tam);
 		void projection(double theta);
+		void visibility();
 
 		vector<vector<double>> matrixMult(vector<vector<double>> mat1, vector<vector<double>> mat2);
 
