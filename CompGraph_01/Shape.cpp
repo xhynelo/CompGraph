@@ -212,6 +212,12 @@ void Shape::projection(double theta)
 		vertices[j].scale = temp[3];
 	}
 }
+
+void Shape::hider()
+{
+
+}
+
 /*
 void Shape::remaping(double newWidth, double newHeight)
 {
@@ -249,11 +255,6 @@ vector<vector<double>> Shape::matrixMult(vector<vector<double>> mat1, vector<vec
 		}
 	}
 	return matrix;
-}
-
-void visibility()
-{
-
 }
 
 /*
