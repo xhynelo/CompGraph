@@ -175,17 +175,42 @@ void Shape::readShape(string name)
 	}
 }
 
-void Shape::slide(double tam) {
+void Shape::slide(double tam)
+{
 	int i, ver = v;
-	for (i = 0; i < v; i++) {
-		addVertex(vertices[i].x, vertices[i].y);
-		vertices[i+v].z = tam;
+	for (i = 0; i < ver; i++) {
+		addVertex(vertices[i].x + position.x + 1, vertices[i].y + position.y);
+		addEdge(i, i + ver);
+		vertices[i + ver].scale = vertices[i].scale;
+		vertices[i+ver].z = tam - position.z;
 	}
+	for (i = ver; i < v - 1; i++) addEdge(i, i + 1);
+	addEdge(v - 1, ver);
 }
 
-void projection(double theta) {
-	double cosT = cos(theta), sinT = sin(theta);
-
+void Shape::projection(double theta)
+{
+	double cosT = cos(theta), sinT = sin(theta), sum = 0;
+	int i, j, k;
+	vector<vector<double>> projc = { {1, 0, 0, 0},
+									 {0, 1, 0, 0},
+									 {cosT, sinT, 0, 0},
+									 {0, 0, 0, 1} };
+	vector<double> temp = { 0, 0, 0, 0 };
+	for (j = 0; j < v; j++) {
+		for (i = 0; i < 4; i++) {
+			sum = 0;
+			for (k = 0; k < 4; k++) {
+				cout << k << " " << j << " " << projc[k][i] << " projection" << endl;
+				sum += vertices[j][k] * projc[k][i];
+			}
+			temp[i] = sum;
+		}
+		vertices[j].x = temp[0];
+		vertices[j].y = temp[1];
+		vertices[j].z = temp[2];
+		vertices[j].scale = temp[3];
+	}
 }
 /*
 void Shape::remaping(double newWidth, double newHeight)
