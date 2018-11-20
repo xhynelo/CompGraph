@@ -129,6 +129,9 @@ void Shape::printShape(SDL_Renderer* renderer, int width, int height) // Print u
 	SDL_GetRendererOutputSize(renderer, &w, &h);
 	//cout << "printShape" << endl;
 	//cout << "e ae" << faces.size() << f << endl;
+	//faces[11].isVisible = false;
+	//faces[7].isVisible = false;
+
 
 	for (fa = 0; fa < f; fa++) {
 		//cout << fa << endl;
