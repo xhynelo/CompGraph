@@ -7,6 +7,8 @@ Vertex::Vertex(double mX, double mY) : x(mX), y(mY), z(0), scale(1) {}
 
 Vertex::Vertex() {}
 
+Face::Face() : color(0), isVisible(true) {}
+
 double& Vertex::operator[](int i) {
 	switch (i)
 	{
@@ -98,7 +100,7 @@ void Shape::addVertex(Vertex v)
 	vertices.push_back(v);
 	this->v++;
 }
-
+/*
 void Shape::printShape(SDL_Renderer* renderer, int width, int height)
 {
 	int w, h;
@@ -119,6 +121,37 @@ void Shape::printShape(SDL_Renderer* renderer, int width, int height)
 		);
 	}
 }
+//*/
+void Shape::printShape(SDL_Renderer* renderer, int width, int height) // Print usando faces
+{
+	int w, h, fa;
+	int Xdi, Xdf, Ydi, Ydf;
+	SDL_GetRendererOutputSize(renderer, &w, &h);
+	//cout << "printShape" << endl;
+	//cout << "e ae" << faces.size() << f << endl;
+
+	for (fa = 0; fa < f; fa++) {
+		//cout << fa << endl;
+		if (faces[fa].isVisible) {
+			//cout << "entrou" << endl;
+			for (auto edge = faces[fa].edges.begin(); edge != faces[fa].edges.end(); ++edge) {
+				//cout << (*edge) << endl;
+				Xdi = (int)(((this->x(edges[*edge].first) + position.x * position.scale) * width) / this->width);
+				Ydi = (int)(((this->y(edges[*edge].first) + position.y * position.scale) * -height) / this->height + height);
+				Xdf = (int)(((this->x(edges[*edge].second) + position.x * position.scale) * width) / this->width);
+				Ydf = (int)(((this->y(edges[*edge].second) + position.y * position.scale) * -height) / this->height + height);
+				//cout << Xdi << " " << Ydi << " " << Xdf << " " << Ydf << endl;
+				SDL_SetRenderDrawColor(renderer, 255, 0, 0, SDL_ALPHA_OPAQUE); // ... (renderer, r, g, b, alpha)
+				SDL_RenderDrawLine(
+					renderer,
+					Xdi, Ydi,
+					Xdf, Ydf
+				);
+			}
+		}
+	}
+	
+}
 
 void Shape::metaShape(SDL_Renderer* renderer, int width, int height)
 {
@@ -130,8 +163,8 @@ void Shape::metaShape(SDL_Renderer* renderer, int width, int height)
 		SDL_SetRenderDrawColor(renderer, 255/v * i, 255 / v * i, 255 / v * i, SDL_ALPHA_OPAQUE); // ... (renderer, r, g, b, alpha)
 		SDL_Rect rect = { Xdi - 2, Ydi - 2, 4, 4 };
 		SDL_RenderFillRect(renderer, &rect);
-		cout << i << "x:" << vertices[i].x << " y:" << vertices[i].y << " s:" << vertices[i].scale << endl;
-		cout << i << "xd:" << Xdi << " yd:" << Ydi << endl;
+		//cout << i << "x:" << vertices[i].x << " y:" << vertices[i].y << " s:" << vertices[i].scale << endl;
+		//cout << i << "xd:" << Xdi << " yd:" << Ydi << endl;
 
 	}
 }
@@ -182,10 +215,22 @@ void Shape::slide(double tam)
 		addVertex(vertices[i].x + position.x + 1, vertices[i].y + position.y);
 		addEdge(i, i + ver);
 		vertices[i + ver].scale = vertices[i].scale;
-		vertices[i+ver].z = tam - position.z;
+		vertices[i + ver].z = tam - position.z;
 	}
 	for (i = ver; i < v - 1; i++) addEdge(i, i + 1);
 	addEdge(v - 1, ver);
+	vector<int> arestas;
+	for (i = 0; i < 10; i++) {
+		arestas.clear();
+		arestas.push_back(i);
+		arestas.push_back(i + 11);
+		arestas.push_back(i + 20);
+		arestas.push_back(i + 10);
+		addFace(arestas);
+	}
+	arestas.clear();
+	arestas = { 20, 21, 22, 23, 24, 25, 26, 27, 28, 29 };
+	addFace(arestas);
 }
 
 void Shape::projection(double theta)
@@ -201,7 +246,7 @@ void Shape::projection(double theta)
 		for (i = 0; i < 4; i++) {
 			sum = 0;
 			for (k = 0; k < 4; k++) {
-				cout << k << " " << j << " " << projc[k][i] << " projection" << endl;
+				//cout << k << " " << j << " " << projc[k][i] << " projection" << endl;
 				sum += vertices[j][k] * projc[k][i];
 			}
 			temp[i] = sum;
@@ -216,6 +261,14 @@ void Shape::projection(double theta)
 void Shape::hider()
 {
 
+}
+
+void Shape::addFace(vector<int> lados)
+{
+	Face fa;
+	fa.edges = lados;
+	f++;
+	faces.push_back(fa);
 }
 
 /*
@@ -307,14 +360,14 @@ void Shape::translade(double x, double y)
 void Shape::rotate(double theta)
 {
 	theta = theta / 180.0 * M_PI;
-	cout << theta << endl;
+	//cout << theta << endl;
 	vector<vector<double>> rotate = {
 		{cos(theta), sin(theta), 0, 0 },
 		{-sin(theta), cos(theta), 0, 0},
 		{0, 0, 1, 0},
 		{0, 0, 0, 1}
 	};
-	cout << "sqrt(theta): " << sqrt(theta) << endl;
+	//cout << "sqrt(theta): " << sqrt(theta) << endl;
 	Vertex aux;
 	double sum;
 	int i, j, k;
@@ -327,7 +380,7 @@ void Shape::rotate(double theta)
 			aux[i] = sum;
 		}
 		vertices[j] = aux;
-		cout << aux << endl;
+		//cout << aux << endl;
 	}
 
 }

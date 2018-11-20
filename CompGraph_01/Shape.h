@@ -13,6 +13,8 @@ struct Face
 	double color;
 	vector<int> edges;
 	bool isVisible;
+	
+	Face();
 };
 
 struct Vertex
@@ -72,6 +74,7 @@ class Shape
 		void slide(double tam);
 		void projection(double theta);
 		void hider();
+		void addFace(vector<int>);
 
 		vector<vector<double>> matrixMult(vector<vector<double>> mat1, vector<vector<double>> mat2);
 
