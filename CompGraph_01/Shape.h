@@ -57,25 +57,23 @@ class Shape
 		double getV();
 		vector<vector<double>> matrix;
 		
-		void setSRU(double x, double y);
-		void scale(double n);
 		void addVertex(double x, double y);
 		void addVertex(Vertex v);
-		void printShape(SDL_Renderer* renderer, int width, int height);
-		void metaShape(SDL_Renderer* renderer, int width, int height);
 		void addEdge(int v1, int v2);
-		void readShape(string name);
-		void remaping(double newWidth, double newHeight);
+		void addFace(vector<int>);
+		void setSRU(double x, double y);
+		void scale(double n);
 		void tranform();
 		void translade(double x, double y);
 		void rotate(double theta);
 		void rotate(double thetaX, double thetaY, double thetaZ);
 		void setPosition(double x, double y);
+		void hider();
 		void slide(double tam);
 		void projection(double theta);
-		void hider();
-		void addFace(vector<int>);
+		void printShape(SDL_Renderer* renderer, int width, int height);
+		void metaShape(SDL_Renderer* renderer, int width, int height);
+		void readShape(string name);
 
 		vector<vector<double>> matrixMult(vector<vector<double>> mat1, vector<vector<double>> mat2);
-
 };
