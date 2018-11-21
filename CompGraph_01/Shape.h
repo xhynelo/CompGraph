@@ -31,6 +31,7 @@ struct Vertex
 	double& operator[](int i);
 	friend std::istream& operator>>(std::istream &is, Vertex &vertex);
 	friend std::ostream& operator<<(std::ostream &is, Vertex &vertex);
+	bool operator ==(const Vertex &b) const;
 };
 
 class Shape

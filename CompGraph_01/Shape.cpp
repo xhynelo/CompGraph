@@ -43,6 +43,16 @@ Vertex::Vertex(double mX, double mY) : x(mX), y(mY), z(0), scale(1) {}
 
 Vertex::Vertex() {}
 
+bool Vertex::operator ==(const Vertex &b) const 
+{
+	if (x == b.x && y == b.y && z == b.z) {
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
 double& Vertex::operator[](int i) {
 	switch (i)
 	{
@@ -79,6 +89,7 @@ void Shape::addVertex(Vertex v)
 	if (!this->v) position = v;
 	v.x = v.x - position.x;
 	v.y = v.y - position.y;
+	v.z = v.z - position.z;
 
 	vertices.push_back(v);
 	this->v++;
@@ -200,7 +211,57 @@ void Shape::setPosition(double x, double y)
 
 void Shape::hider()
 {
-
+	cout << "entrei" << endl;
+	int v0, v1, v2, p0x, p0y, p0z, p1x, p1y, p1z, px, py, pz, V;
+	Vertex N, teste1, teste2;
+	teste1 = Ver
+	for (int i = 0; i < f; i++) {
+		cout << "face: " << i << endl;
+		if (edges[faces[i].edges[0]].first == edges[faces[i].edges[1]].first) {
+			v0 = edges[faces[i].edges[0]].second;
+			cout << "face: " << i << " vertice: " << v0 << " v0.x " << vertices[v0].x << " v0.y: " << vertices[v0].y << " v0.y: " << vertices[v0].z << endl;
+			v1 = edges[faces[i].edges[0]].first;
+			cout << "face: " << i << " vertice: " << v1 << " v0.x " << vertices[v1].x << " v1.y: " << vertices[v1].y << " v1.y: " << vertices[v1].z << endl;
+			v2 = edges[faces[i].edges[1]].second;
+			cout << "face: " << i << " vertice: " << v0 << " v0.x " << vertices[v0].x << " v2.y: " << vertices[v0].y << " v2.y: " << vertices[v0].z << endl;
+			cout << "face: " << i << " igual" << endl;
+		}
+		else {
+			v0 = edges[faces[i].edges[0]].first;
+			cout << "face: " << i << " vertice: " << v0 << " v0.x " << vertices[v0].x << " v0.y: " << vertices[v0].y << " v0.y: " << vertices[v0].z << endl;
+			v1 = edges[faces[i].edges[0]].second;
+			cout << "face: " << i << " vertice: " << v1 << " v0.x " << vertices[v1].x << " v1.y: " << vertices[v1].y << " v1.y: " << vertices[v1].z << endl;
+			v2 = edges[faces[i].edges[1]].second;
+			cout << "face: " << i << " vertice: " << v0 << " v0.x " << vertices[v0].x << " v2.y: " << vertices[v0].y << " v2.y: " << vertices[v0].z << endl;
+			cout << "face: " << i << " diferente" << endl;
+		}
+		p0x = (vertices[v0].x + position.x) - (vertices[v1].x + position.x);
+		p0y = (vertices[v0].y + position.y) - (vertices[v1].y + position.y);
+		p0z = (vertices[v0].z + position.z) - (vertices[v1].z + position.z);
+		p1x = (vertices[v2].x + position.x) - (vertices[v1].x + position.x);
+		p1y = (vertices[v2].y + position.y) - (vertices[v1].y + position.y);
+		p1z = (vertices[v2].z + position.z) - (vertices[v1].z + position.z);
+		cout << "face: " << i << " vertice " << v0 << " " << v1 << " p0x: " << p0x << " p0y: " << p0y << " p0z: " << p0z << endl;
+		cout << "face: " << i << " vertice " << v2 << " " << v1 << " p1x: " << p1x << " p1y: " << p1y << " p1z: " << p1z << endl;
+		N.x = p0y * p1z - p0z * p1y;
+		N.y = p0x * p1z - p0z * p1x;
+		N.z = p0x * p1y - p0y * p1x;
+		cout << "face: " << i << " Nx: " << N.x << " Ny: " << N.y << " Nz: " << N.z << endl;
+		px = (vertices[v0].x + position.x) - 50;
+		py = (vertices[v0].y + position.x) - 50;
+		pz = (vertices[v0].z + position.x) - 100;
+		cout << "face: " << i << " px: " << px << " py: " << py << " pz: " << pz << endl;
+		V = px * N.x + py * N.y + pz * N.z;
+		cout << "face: " << i << " Normal: " << V << endl;
+		if (V >= 0) {
+			faces[i].isVisible = true;
+			cout << "face: " << i << " visivel" << endl;
+		}
+		else {
+			faces[i].isVisible = false;
+			cout << "face: " << i << " nao_visivel" << endl;
+		}
+	}
 }
 
 void Shape::slide(double tam)
@@ -224,7 +285,10 @@ void Shape::slide(double tam)
 		addFace(arestas);
 	}
 	arestas.clear();
-	arestas = { 20, 21, 22, 23, 24, 25, 26, 27, 28, 29 };
+	arestas = { 9, 10, 29, 19 };
+	addFace(arestas);
+	arestas.clear();
+	arestas = { 29, 28, 27, 26, 25, 24, 23, 22, 21, 20 };
 	addFace(arestas);
 }
 
@@ -285,7 +349,7 @@ void Shape::printShape(SDL_Renderer* renderer, int width, int height) // Print u
 	//faces[11].isVisible = false;
 	//faces[7].isVisible = false;
 
-
+	
 	for (fa = 0; fa < f; fa++) {
 		//cout << fa << endl;
 		if (faces[fa].isVisible) {
