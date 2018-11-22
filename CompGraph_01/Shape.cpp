@@ -478,7 +478,14 @@ void Shape::printShape(SDL_Renderer* renderer, int width, int height, int mode) 
 			}
 			std::sort(ET.begin(), ET.end());
 			if (mode != WIRE_FRAME) {
-				SDL_SetRenderDrawColor(renderer, 255, 0, 0, SDL_ALPHA_OPAQUE);
+				if (faces[fa].isLighted && mode == SOLID_WITH_LIGHT) {
+					SDL_SetRenderDrawColor(renderer, 255, 0, 0, SDL_ALPHA_OPAQUE);
+				}
+				else {
+					// faces[fa].color blah
+					SDL_SetRenderDrawColor(renderer, 255, 0, 0, SDL_ALPHA_OPAQUE);
+				}
+				
 				int y = ET[0].yMin;
 				while (!ET.empty()) {
 					if (!AL.empty()) {
