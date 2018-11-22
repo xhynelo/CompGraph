@@ -5,6 +5,10 @@
 #include <fstream>
 #include <SDL.h>
 
+#define WIRE_FRAME -1
+#define SOLID 0
+#define SOLID_WITH_LIGHT 1
+
 using namespace std;
 
 
@@ -13,6 +17,7 @@ struct Face
 	double color;
 	vector<int> edges;
 	bool isVisible;
+	bool isLighted;
 	
 	Face();
 };
@@ -72,7 +77,7 @@ class Shape
 		void hider();
 		void slide(double tam);
 		void projection(double theta);
-		void printShape(SDL_Renderer* renderer, int width, int height);
+		void printShape(SDL_Renderer* renderer, int width, int height, int mode);
 		void metaShape(SDL_Renderer* renderer, int width, int height);
 		void readShape(string name);
 
