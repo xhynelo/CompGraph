@@ -104,10 +104,11 @@ void Shape::addEdge(int v1, int v2)
 
 Face::Face() : color(0), isVisible(true), isLighted(false) {}
 
-void Shape::addFace(vector<int> lados)
+void Shape::addFace(vector<int> lados, int color)
 {
 	Face fa;
 	fa.edges = lados;
+	fa.color = color;
 	f++;
 	faces.push_back(fa);
 }
@@ -322,7 +323,7 @@ void Shape::slide(double tam)
 		vertices[i + ver].scale = vertices[i].scale;
 		vertices[i + ver].z = tam - position.z;
 	}
-	for (i = ver; i < v - 1; i++) addEdge(i, i + 1);
+	for (i = ver; i < v - 1; i++) addEdge(i+ 1, i);
 	addEdge(v - 1, ver);
 	vector<int> arestas;
 	for (i = 0; i < 9; i++) {
@@ -331,14 +332,15 @@ void Shape::slide(double tam)
 		arestas.push_back(i + 11);
 		arestas.push_back(i + 20);
 		arestas.push_back(i + 10);
-		addFace(arestas);
+		addFace(arestas, 444);
 	}
 	arestas.clear();
 	arestas = { 9, 10, 29, 19 };
-	addFace(arestas);
+	addFace(arestas, 50);
 	arestas.clear();
-	arestas = { 20, 21, 22, 23, 24, 25, 26, 27, 28, 29 };
-	addFace(arestas);
+	for (i = 20; i < 30; i++) { arestas.push_back(i); }
+	addFace(arestas, 9);
+	iter_swap(faces.begin(), faces.end()-1);
 }
 
 void Shape::projection(double theta)
@@ -479,11 +481,15 @@ void Shape::printShape(SDL_Renderer* renderer, int width, int height, int mode) 
 			std::sort(ET.begin(), ET.end());
 			if (mode != WIRE_FRAME) {
 				if (faces[fa].isLighted && mode == SOLID_WITH_LIGHT) {
-					SDL_SetRenderDrawColor(renderer, 255, 0, 0, SDL_ALPHA_OPAQUE);
+					SDL_SetRenderDrawColor(renderer, 255, 165, 0, SDL_ALPHA_OPAQUE);
 				}
 				else {
-					// faces[fa].color blah
-					SDL_SetRenderDrawColor(renderer, 255, 0, 0, SDL_ALPHA_OPAQUE);
+					int r, g, b;
+					r = faces[fa].color % 100;
+					if (r > 9) { r = 9; }
+					g = faces[fa].color % 10 - r * 10;
+					b = faces[fa].color - g * 10;
+					SDL_SetRenderDrawColor(renderer, 255 * r / 9, 255 * g / 9, 255 * b / 9, SDL_ALPHA_OPAQUE);
 				}
 				
 				int y = ET[0].yMin;
