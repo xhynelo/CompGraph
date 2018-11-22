@@ -267,7 +267,7 @@ void Shape::setPosition(double x, double y)
 	position.y = y;
 }
 
-void Shape::hider()
+void Shape::hider(double x, double y, double z, bool islight)
 {
 	int v0, v1, v2, p0x, p0y, p0z, p1x, p1y, p1z, px, py, pz, V;
 	Vertex N;
@@ -305,12 +305,23 @@ void Shape::hider()
 		py = (vertices[v0].y + position.x) - 0;
 		pz = (vertices[v0].z + position.x) - 100;
 		V = px * N.x + py * N.y + pz * N.z;
-		if (V >= 0) {
-			faces[i].isVisible = true;
+		if (!islight) {
+			if (V >= 0) {
+				faces[i].isVisible = true;
+			}
+			else {
+				faces[i].isVisible = false;
+			}
 		}
 		else {
-			faces[i].isVisible = false;
+			if (V >= 0) {
+				faces[i].isLighted = true;
+			}
+			else {
+				faces[i].isLighted = false;
+			}
 		}
+		
 	}
 }
 
@@ -332,7 +343,7 @@ void Shape::slide(double tam)
 		arestas.push_back(i + 11);
 		arestas.push_back(i + 20);
 		arestas.push_back(i + 10);
-		addFace(arestas, 444);
+		addFace(arestas, 900);
 	}
 	arestas.clear();
 	arestas = { 9, 10, 29, 19 };
@@ -412,7 +423,9 @@ struct EdgeBucket
 	}
 	EdgeBucket();
 };
+
 EdgeBucket::EdgeBucket() {}
+
 void Shape::printShape(SDL_Renderer* renderer, int width, int height, int mode) // Print usando faces
 {
 	int w, h, fa;
@@ -482,6 +495,7 @@ void Shape::printShape(SDL_Renderer* renderer, int width, int height, int mode) 
 			if (mode != WIRE_FRAME) {
 				if (faces[fa].isLighted && mode == SOLID_WITH_LIGHT) {
 					SDL_SetRenderDrawColor(renderer, 255, 165, 0, SDL_ALPHA_OPAQUE);
+					cout <<"face: " << fa << " islight: " << faces[fa].isLighted << endl;
 				}
 				else {
 					int r, g, b;
@@ -522,10 +536,10 @@ void Shape::printShape(SDL_Renderer* renderer, int width, int height, int mode) 
 						}
 					}
 					std::sort(AL.begin(), AL.end());
-					cout << AL.size() << endl;
+					//cout << AL.size() << endl;
 					int tam = AL.size();
 					for (int i = 0; i < tam-1; i++) {
-						cout << AL[i].x << endl;
+						//cout << AL[i].x << endl;
 						SDL_RenderDrawLine(
 							renderer,
 							AL[i].x, y,

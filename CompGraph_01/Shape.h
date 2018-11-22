@@ -74,7 +74,7 @@ class Shape
 		void rotate(double theta);
 		void rotate(double thetaX, double thetaY, double thetaZ);
 		void setPosition(double x, double y);
-		void hider();
+		void hider(double x, double y, double z, bool islight);
 		void slide(double tam);
 		void projection(double theta);
 		void printShape(SDL_Renderer* renderer, int width, int height, int mode);
