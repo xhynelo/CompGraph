@@ -214,16 +214,22 @@ void Shape::hider()
 	cout << "entrei" << endl;
 	int v0, v1, v2, p0x, p0y, p0z, p1x, p1y, p1z, px, py, pz, V;
 	Vertex N, teste1, teste2;
-	teste1 = Ver
+	teste1 = Vertex(2, 9);
+	teste2 = Vertex(2, 9);
+	if (teste1 == teste2) { cout << "teste1 e teste2 sao iguai" << endl; }
 	for (int i = 0; i < f; i++) {
 		cout << "face: " << i << endl;
+		for (int j = 0; j < faces[i].edges.size(); j++) {
+			cout << "aresta " << j << ": " << faces[i].edges[j] << " -> ";
+		}
+		cout << endl;
 		if (edges[faces[i].edges[0]].first == edges[faces[i].edges[1]].first) {
 			v0 = edges[faces[i].edges[0]].second;
 			cout << "face: " << i << " vertice: " << v0 << " v0.x " << vertices[v0].x << " v0.y: " << vertices[v0].y << " v0.y: " << vertices[v0].z << endl;
 			v1 = edges[faces[i].edges[0]].first;
 			cout << "face: " << i << " vertice: " << v1 << " v0.x " << vertices[v1].x << " v1.y: " << vertices[v1].y << " v1.y: " << vertices[v1].z << endl;
 			v2 = edges[faces[i].edges[1]].second;
-			cout << "face: " << i << " vertice: " << v0 << " v0.x " << vertices[v0].x << " v2.y: " << vertices[v0].y << " v2.y: " << vertices[v0].z << endl;
+			cout << "face: " << i << " vertice: " << v2 << " v0.x " << vertices[v2].x << " v2.y: " << vertices[v2].y << " v2.y: " << vertices[v2].z << endl;
 			cout << "face: " << i << " igual" << endl;
 		}
 		else {
@@ -232,7 +238,8 @@ void Shape::hider()
 			v1 = edges[faces[i].edges[0]].second;
 			cout << "face: " << i << " vertice: " << v1 << " v0.x " << vertices[v1].x << " v1.y: " << vertices[v1].y << " v1.y: " << vertices[v1].z << endl;
 			v2 = edges[faces[i].edges[1]].second;
-			cout << "face: " << i << " vertice: " << v0 << " v0.x " << vertices[v0].x << " v2.y: " << vertices[v0].y << " v2.y: " << vertices[v0].z << endl;
+			cout << "face: " << i << " vertice: " << v2 << " v0.x " << vertices[v2].x << " v2.y: " << vertices[v2].y << " v2.y: " << vertices[v2].z << endl;
+			cout << "face: " << i << " vertice a first: " << edges[faces[i].edges[0]].first << " vertice a second: " << edges[faces[i].edges[0]].second << " vertice b first:: " << edges[faces[i].edges[1]].first << " vertice b second: " << edges[faces[i].edges[1]].second << endl;
 			cout << "face: " << i << " diferente" << endl;
 		}
 		p0x = (vertices[v0].x + position.x) - (vertices[v1].x + position.x);
@@ -247,9 +254,9 @@ void Shape::hider()
 		N.y = p0x * p1z - p0z * p1x;
 		N.z = p0x * p1y - p0y * p1x;
 		cout << "face: " << i << " Nx: " << N.x << " Ny: " << N.y << " Nz: " << N.z << endl;
-		px = (vertices[v0].x + position.x) - 50;
-		py = (vertices[v0].y + position.x) - 50;
-		pz = (vertices[v0].z + position.x) - 100;
+		px = (vertices[v0].x + position.x) + 100;
+		py = (vertices[v0].y + position.x) + 50;
+		pz = (vertices[v0].z + position.x) + 100;
 		cout << "face: " << i << " px: " << px << " py: " << py << " pz: " << pz << endl;
 		V = px * N.x + py * N.y + pz * N.z;
 		cout << "face: " << i << " Normal: " << V << endl;
@@ -276,7 +283,7 @@ void Shape::slide(double tam)
 	for (i = ver; i < v - 1; i++) addEdge(i, i + 1);
 	addEdge(v - 1, ver);
 	vector<int> arestas;
-	for (i = 0; i < 10; i++) {
+	for (i = 0; i < 9; i++) {
 		arestas.clear();
 		arestas.push_back(i);
 		arestas.push_back(i + 11);
