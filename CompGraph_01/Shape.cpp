@@ -201,6 +201,63 @@ void Shape::rotate(double theta)
 	}
 
 }
+
+void Shape::rotate(double thetaX, double thetaY, double thetaZ){
+	vector<vector<double>> rotate_;
+	if (thetaX != 0) {
+		rotate(thetaX);
+	}
+	if (thetaY != 0){
+		thetaZ = thetaZ / 180.0 * M_PI;
+		//cout << theta << endl;
+		rotate_ = {
+			{cos(thetaY), 0, sin(thetaY), 0},
+			{0, 1, 0, 0 },
+			{-sin(thetaY), 0, cos(thetaY), 0},
+			{0, 0, 0, 1}
+		};
+		//cout << "sqrt(theta): " << sqrt(theta) << endl;
+		Vertex aux;
+		double sum;
+		int i, j, k;
+		for (j = 0; j < this->v; j++) {
+			for (i = 0; i < 4; i++) {
+				sum = 0;
+				for (k = 0; k < 4; k++) {
+					sum += vertices[j][k] * rotate_[k][i];
+				}
+				aux[i] = sum;
+			}
+			vertices[j] = aux;
+			//cout << aux << endl;
+		}
+	}
+	if (thetaZ != 0) {
+		thetaZ = thetaZ / 180.0 * M_PI;
+		//cout << theta << endl;
+		rotate_ = {
+			{1, 0, 0 ,0},
+			{0, cos(thetaZ), -sin(thetaZ), 0 },
+			{0, sin(thetaZ), cos(thetaZ), 0},
+			{0, 0, 0, 1}
+		};
+		//cout << "sqrt(theta): " << sqrt(theta) << endl;
+		Vertex aux;
+		double sum;
+		int i, j, k;
+		for (j = 0; j < this->v; j++) {
+			for (i = 0; i < 4; i++) {
+				sum = 0;
+				for (k = 0; k < 4; k++) {
+					sum += vertices[j][k] * rotate_[k][i];
+				}
+				aux[i] = sum;
+			}
+			vertices[j] = aux;
+			//cout << aux << endl;
+		}
+	}
+}
 //*/
 
 void Shape::setPosition(double x, double y)
@@ -211,36 +268,28 @@ void Shape::setPosition(double x, double y)
 
 void Shape::hider()
 {
-	cout << "entrei" << endl;
 	int v0, v1, v2, p0x, p0y, p0z, p1x, p1y, p1z, px, py, pz, V;
-	Vertex N, teste1, teste2;
-	teste1 = Vertex(2, 9);
-	teste2 = Vertex(2, 9);
-	if (teste1 == teste2) { cout << "teste1 e teste2 sao iguai" << endl; }
+	Vertex N;
 	for (int i = 0; i < f; i++) {
-		cout << "face: " << i << endl;
-		for (int j = 0; j < faces[i].edges.size(); j++) {
-			cout << "aresta " << j << ": " << faces[i].edges[j] << " -> ";
-		}
-		cout << endl;
 		if (edges[faces[i].edges[0]].first == edges[faces[i].edges[1]].first) {
 			v0 = edges[faces[i].edges[0]].second;
-			cout << "face: " << i << " vertice: " << v0 << " v0.x " << vertices[v0].x << " v0.y: " << vertices[v0].y << " v0.y: " << vertices[v0].z << endl;
 			v1 = edges[faces[i].edges[0]].first;
-			cout << "face: " << i << " vertice: " << v1 << " v0.x " << vertices[v1].x << " v1.y: " << vertices[v1].y << " v1.y: " << vertices[v1].z << endl;
 			v2 = edges[faces[i].edges[1]].second;
-			cout << "face: " << i << " vertice: " << v2 << " v0.x " << vertices[v2].x << " v2.y: " << vertices[v2].y << " v2.y: " << vertices[v2].z << endl;
-			cout << "face: " << i << " igual" << endl;
+		}
+		else if (edges[faces[i].edges[0]].first == edges[faces[i].edges[1]].second) {
+			v0 = edges[faces[i].edges[0]].second;
+			v1 = edges[faces[i].edges[0]].first;
+			v2 = edges[faces[i].edges[1]].first;
+		}
+		else if (edges[faces[i].edges[0]].second == edges[faces[i].edges[1]].first) {
+			v0 = edges[faces[i].edges[0]].first;
+			v1 = edges[faces[i].edges[0]].second;
+			v2 = edges[faces[i].edges[1]].second;
 		}
 		else {
 			v0 = edges[faces[i].edges[0]].first;
-			cout << "face: " << i << " vertice: " << v0 << " v0.x " << vertices[v0].x << " v0.y: " << vertices[v0].y << " v0.y: " << vertices[v0].z << endl;
 			v1 = edges[faces[i].edges[0]].second;
-			cout << "face: " << i << " vertice: " << v1 << " v0.x " << vertices[v1].x << " v1.y: " << vertices[v1].y << " v1.y: " << vertices[v1].z << endl;
-			v2 = edges[faces[i].edges[1]].second;
-			cout << "face: " << i << " vertice: " << v2 << " v0.x " << vertices[v2].x << " v2.y: " << vertices[v2].y << " v2.y: " << vertices[v2].z << endl;
-			cout << "face: " << i << " vertice a first: " << edges[faces[i].edges[0]].first << " vertice a second: " << edges[faces[i].edges[0]].second << " vertice b first:: " << edges[faces[i].edges[1]].first << " vertice b second: " << edges[faces[i].edges[1]].second << endl;
-			cout << "face: " << i << " diferente" << endl;
+			v2 = edges[faces[i].edges[1]].first;
 		}
 		p0x = (vertices[v0].x + position.x) - (vertices[v1].x + position.x);
 		p0y = (vertices[v0].y + position.y) - (vertices[v1].y + position.y);
@@ -248,25 +297,18 @@ void Shape::hider()
 		p1x = (vertices[v2].x + position.x) - (vertices[v1].x + position.x);
 		p1y = (vertices[v2].y + position.y) - (vertices[v1].y + position.y);
 		p1z = (vertices[v2].z + position.z) - (vertices[v1].z + position.z);
-		cout << "face: " << i << " vertice " << v0 << " " << v1 << " p0x: " << p0x << " p0y: " << p0y << " p0z: " << p0z << endl;
-		cout << "face: " << i << " vertice " << v2 << " " << v1 << " p1x: " << p1x << " p1y: " << p1y << " p1z: " << p1z << endl;
 		N.x = p0y * p1z - p0z * p1y;
 		N.y = p0x * p1z - p0z * p1x;
 		N.z = p0x * p1y - p0y * p1x;
-		cout << "face: " << i << " Nx: " << N.x << " Ny: " << N.y << " Nz: " << N.z << endl;
-		px = (vertices[v0].x + position.x) + 100;
-		py = (vertices[v0].y + position.x) + 50;
-		pz = (vertices[v0].z + position.x) + 100;
-		cout << "face: " << i << " px: " << px << " py: " << py << " pz: " << pz << endl;
+		px = (vertices[v0].x + position.x) - 0;
+		py = (vertices[v0].y + position.x) - 0;
+		pz = (vertices[v0].z + position.x) - 100;
 		V = px * N.x + py * N.y + pz * N.z;
-		cout << "face: " << i << " Normal: " << V << endl;
 		if (V >= 0) {
 			faces[i].isVisible = true;
-			cout << "face: " << i << " visivel" << endl;
 		}
 		else {
 			faces[i].isVisible = false;
-			cout << "face: " << i << " nao_visivel" << endl;
 		}
 	}
 }
@@ -295,7 +337,7 @@ void Shape::slide(double tam)
 	arestas = { 9, 10, 29, 19 };
 	addFace(arestas);
 	arestas.clear();
-	arestas = { 29, 28, 27, 26, 25, 24, 23, 22, 21, 20 };
+	arestas = { 20, 21, 22, 23, 24, 25, 26, 27, 28, 29 };
 	addFace(arestas);
 }
 
