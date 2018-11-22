@@ -439,33 +439,46 @@ void Shape::printShape(SDL_Renderer* renderer, int width, int height, int mode) 
 				//cout << Xdi << " " << Ydi << " " << Xdf << " " << Ydf << endl;
 				if(mode != WIRE_FRAME)
 				{
-					EdgeBucket nEB;
-					nEB.dy = Ydi - Ydf;
-					if (nEB.dy != 0)
-					{
-						nEB.dx = Xdi - Xdf;
-						if (nEB.dx < 0)
+					int k;
+					vector<Face> divs;
+					if (fa == 0 || fa == faces.size() - 1)
+					{ 
+						Face f1, f2, f3;
+						f1.edges.push_back(faces[fa].edges[9]);
+						pair<int, int> e;
+						//----------------------------------bah
+						k = 2; 
+					}
+					while (k > 0) {
+						EdgeBucket nEB;
+						nEB.dy = Ydi - Ydf;
+						if (nEB.dy != 0)
 						{
-							nEB.dx = -nEB.dx;
+							nEB.dx = Xdi - Xdf;
+							if (nEB.dx < 0)
+							{
+								nEB.dx = -nEB.dx;
+							}
+							if (nEB.dy > 0)
+							{
+								nEB.yMax = Ydi;
+								nEB.yMin = Ydf;
+								nEB.x = Xdf;
+								nEB.sign = -1;
+							}
+							else
+							{
+								nEB.yMax = Ydf;
+								nEB.yMin = Ydi;
+								nEB.x = Xdf;
+								nEB.sign = 1;
+								nEB.dy = -nEB.dy;
+							}
+							nEB.sum = 0;
+							nEB.key = nEB.yMin;
+							ET.push_back(nEB);
 						}
-						if (nEB.dy > 0)
-						{
-							nEB.yMax = Ydi;
-							nEB.yMin = Ydf;
-							nEB.x = Xdf;
-							nEB.sign = -1;
-						}
-						else
-						{
-							nEB.yMax = Ydf;
-							nEB.yMin = Ydi;
-							nEB.x = Xdf;
-							nEB.sign = 1;
-							nEB.dy = -nEB.dy;
-						}
-						nEB.sum = 0;
-						nEB.key = nEB.yMin;
-						ET.push_back(nEB);
+						k--;
 					}
 				}
 				if (mode == WIRE_FRAME) 
@@ -522,10 +535,10 @@ void Shape::printShape(SDL_Renderer* renderer, int width, int height, int mode) 
 						}
 					}
 					std::sort(AL.begin(), AL.end());
-					cout << AL.size() << endl;
+					//cout << AL.size() << endl;
 					int tam = AL.size();
 					for (int i = 0; i < tam-1; i++) {
-						cout << AL[i].x << endl;
+						//cout << AL[i].x << endl;
 						SDL_RenderDrawLine(
 							renderer,
 							AL[i].x, y,
