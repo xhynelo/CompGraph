@@ -478,20 +478,25 @@ void Shape::printShape(SDL_Renderer* renderer, int width, int height, int mode) 
 			}
 			std::sort(ET.begin(), ET.end());
 			if (mode != WIRE_FRAME) {
+				SDL_SetRenderDrawColor(renderer, 255, 0, 0, SDL_ALPHA_OPAQUE);
 				int y = ET[0].yMin;
 				while (!ET.empty()) {
 					if (!AL.empty()) {
 						int i = 0;
-						while (i < AL.size()) {
+						int j = AL.size();
+						while (i < j) {
 							if (AL[i].yMax == y) {
 								AL.erase(AL.begin() + i);
+								j--;
 							}
 							else { i++; }
 						}
 						i = 0;
-						while (i < ET.size()) {
+						j = ET.size();
+						while (i < j) {
 							if (ET[i].yMax == y) {
-								ET.erase(AL.begin() + i);
+								ET.erase(ET.begin() + i);
+								j--;
 							}
 							else { i++; }
 						}
@@ -500,11 +505,30 @@ void Shape::printShape(SDL_Renderer* renderer, int width, int height, int mode) 
 						if (ET[i].yMin == y)
 						{
 							AL.push_back(ET[i]);
-							AL[-1].key = AL[-1].x;
+							AL[AL.size()-1].key = AL[AL.size() - 1].x;
 						}
 					}
 					std::sort(AL.begin(), AL.end());
-					// NingenAki
+					cout << AL.size() << endl;
+					int tam = AL.size();
+					for (int i = 0; i < tam-1; i++) {
+						cout << AL[i].x << endl;
+						SDL_RenderDrawLine(
+							renderer,
+							AL[i].x, y,
+							AL[i+1].x, y
+						);
+					}
+					for (int i = 0; i < AL.size(); ++i) {
+						if (AL[i].dx != 0) {
+							AL[i].sum += AL[i].dx;
+						}
+						while (AL[i].sum >= AL[i].dy) {
+							AL[i].x += AL[i].sign;
+							AL[i].sum -= AL[i].dy;
+						}
+					}
+					y++;
 				}
 			}
 		}
