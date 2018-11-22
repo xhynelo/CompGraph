@@ -439,7 +439,7 @@ void Shape::printShape(SDL_Renderer* renderer, int width, int height, int mode) 
 				//cout << Xdi << " " << Ydi << " " << Xdf << " " << Ydf << endl;
 				if(mode != WIRE_FRAME)
 				{
-					int k;
+					int k = 1;
 					vector<Face> divs;
 					if (fa == 0 || fa == faces.size() - 1)
 					{ 
@@ -447,7 +447,7 @@ void Shape::printShape(SDL_Renderer* renderer, int width, int height, int mode) 
 						f1.edges.push_back(faces[fa].edges[9]);
 						pair<int, int> e;
 						//----------------------------------bah
-						k = 2; 
+						k = 3; 
 					}
 					while (k > 0) {
 						EdgeBucket nEB;
