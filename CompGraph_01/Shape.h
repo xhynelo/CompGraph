@@ -14,7 +14,7 @@ using namespace std;
 
 struct Face
 {
-	double color;
+	int color;
 	vector<int> edges;
 	bool isVisible;
 	bool isLighted;
@@ -66,7 +66,7 @@ class Shape
 		void addVertex(double x, double y);
 		void addVertex(Vertex v);
 		void addEdge(int v1, int v2);
-		void addFace(vector<int>);
+		void addFace(vector<int> lados, int color);
 		void setSRU(double x, double y);
 		void scale(double n);
 		void tranform();
