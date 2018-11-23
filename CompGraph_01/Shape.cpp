@@ -572,33 +572,45 @@ void Shape::printShape(SDL_Renderer* renderer, int width, int height, int mode) 
 			if (mode != WIRE_FRAME) {
 				//cout << "ET empty: " << ET.empty() << endl;
 				int k = 0;
-				//vector<vector<EdgeBucket>> divs;
-				/*
+				vector<vector<EdgeBucket>> divs;
+				//*
 				if (fa == 0 || fa == faces.size() - 1)
 				{
-					ET.clear;
-					ET.push_back(faces[fa].edges[9]);
-					Xdi = (int)(((this->x(edges[*edge].first) + position.x * position.scale) * width) / this->width);
-					Ydi = (int)(((this->y(edges[*edge].first) + position.y * position.scale) * -height) / this->height + height);
-					Xdf = (int)(((this->x(edges[*edge].second) + position.x * position.scale) * width) / this->width);
-					Ydf = (int)(((this->y(edges[*edge].second) + position.y * position.scale) * -height) / this->height + height);
-				
-					f1.edges.push_back(faces[fa].edges[0]);
-					f1.edges.push_back(faces[fa].edges[1]);
-					f2.edges.push_back(faces[fa].edges[2]);
-					f2.edges.push_back(faces[fa].edges[6]);
-					f2.edges.push_back(faces[fa].edges[7]);
-					f2.edges.push_back(faces[fa].edges[8]);
-					f3.edges.push_back(faces[fa].edges[3]);
-					f3.edges.push_back(faces[fa].edges[4]);
-					f3.edges.push_back(faces[fa].edges[5]);
-					pair<int, int> e1, e2;
-					e1.first = 9 + faces[fa].edges[0];
-					e1.second = 2 + faces[fa].edges[0];
-					e2.first = 3 + faces[fa].edges[0];
-					e2.second = 6 + faces[fa].edges[0];
-
-
+					int i = edges[faces[fa].edges[0]].first, j = i + 9;
+					k = 14;
+					ET.clear();
+					while (k> 0) {
+						Xdi = (int)(((this->x(i) + position.x * position.scale) * width) / this->width);
+						Ydi = (int)(((this->y(i) + position.y * position.scale) * -height) / this->height + height);
+						Xdf = (int)(((this->x(j) + position.x * position.scale) * width) / this->width);
+						Ydf = (int)(((this->y(j) + position.y * position.scale) * -height) / this->height + height);
+						ET.push_back(addToBucket(Xdi, Ydi, Xdf, Ydf));
+						if (k == 14) { j = i + 2; i += 9; }
+						if (k == 13) { j = i; i--; }
+						if (k == 12) { j = i; i--; }
+						if (k == 11) { 
+							divs.push_back(ET);
+							ET.clear();
+							j += 9; i ++; 
+						}
+						if (k == 10) { i = j; j--; }
+						if (k == 9) { i--; j--; }
+						if (k == 8) { i--; j--; }
+						if (k == 7) { i = j; j -= 3; }
+						if (k == 6) { i = j; j--; }
+						if (k == 5) { 
+							divs.push_back(ET);
+							ET.clear();
+							j += 4; }
+						if (k == 4) { i = j; j--; }
+						if (k == 3) { i--; j--; }
+						if (k == 2) { i--; j--; }
+						if (k == 1) {
+							divs.push_back(ET);
+							ET.clear();
+						}
+						k--;
+					}
 					k = 3;
 				}
 				//*/
@@ -618,6 +630,8 @@ void Shape::printShape(SDL_Renderer* renderer, int width, int height, int mode) 
 					//SDL_SetRenderDrawColor(renderer, 128, 128, 128, SDL_ALPHA_OPAQUE);
 				}
 				while (k >= 0) {
+					if (k > 0) { ET.swap(divs[k-1]); }
+
 					int y = ET[0].yMin;
 					while (!ET.empty()) {
 						if (!AL.empty()) {
@@ -669,6 +683,7 @@ void Shape::printShape(SDL_Renderer* renderer, int width, int height, int mode) 
 						}
 						y++;
 					}
+					if (k == 1) { k--; }
 					k--;
 				}
 			}
