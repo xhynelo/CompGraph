@@ -301,18 +301,18 @@ void Shape::hider(double x, double y, double z, bool islight)
 	Vertex N, p;
 	Vertex coor(x, y, z);
 	for (int i = 0; i < f; i++) {
-		cout << "a[0] " << vertices[edges[faces[i].edges[0]].first] << endl;
-		cout << "a[1] " << vertices[edges[faces[i].edges[0]].second] << endl;
-		cout << "b[0] " << vertices[edges[faces[i].edges[1]].first] << endl;
-		cout << "b[1] " << vertices[edges[faces[i].edges[1]].second] << endl;
+		//cout << "a[0] " << vertices[edges[faces[i].edges[0]].first] << endl;
+		//cout << "a[1] " << vertices[edges[faces[i].edges[0]].second] << endl;
+		//cout << "b[0] " << vertices[edges[faces[i].edges[1]].first] << endl;
+		//cout << "b[1] " << vertices[edges[faces[i].edges[1]].second] << endl;
 		if (edges[faces[i].edges[0]].first == edges[faces[i].edges[1]].first) {
-			cout << "Triangulo " << i << " " << 1 << endl;
+			//cout << "Triangulo " << i << " " << 1 << endl;
 			p0 = vertices[edges[faces[i].edges[0]].first] - vertices[edges[faces[i].edges[0]].second];
 			p1 = vertices[edges[faces[i].edges[1]].second] - vertices[edges[faces[i].edges[0]].second];
 			v0 = edges[faces[i].edges[0]].first;
 		}
 		else if (edges[faces[i].edges[0]].first == edges[faces[i].edges[1]].second) {
-			cout << "Triangulo " << i << " " << 2 << endl;
+			//cout << "Triangulo " << i << " " << 2 << endl;
 			p0 = vertices[edges[faces[i].edges[0]].first] - vertices[edges[faces[i].edges[0]].second];
 			p1 = vertices[edges[faces[i].edges[1]].first] - vertices[edges[faces[i].edges[0]].second];
 			
@@ -320,7 +320,7 @@ void Shape::hider(double x, double y, double z, bool islight)
 
 		}
 		else if (edges[faces[i].edges[0]].second == edges[faces[i].edges[1]].first) {
-			cout << "Triangulo " << i << " " << 3 << endl;
+			//cout << "Triangulo " << i << " " << 3 << endl;
 			
 			p0 = vertices[edges[faces[i].edges[0]].second] - vertices[edges[faces[i].edges[0]].first];
 			p1 = vertices[edges[faces[i].edges[1]].second] - vertices[edges[faces[i].edges[0]].first];
@@ -328,17 +328,17 @@ void Shape::hider(double x, double y, double z, bool islight)
 
 		}
 		else {
-			cout << "Triangulo " << i << " " << 4 << endl;
+			//cout << "Triangulo " << i << " " << 4 << endl;
 			p0 = vertices[edges[faces[i].edges[0]].second] - vertices[edges[faces[i].edges[0]].first];
 			p1 = vertices[edges[faces[i].edges[1]].first] - vertices[edges[faces[i].edges[0]].first];
 			v0 = edges[faces[i].edges[0]].first;
 		}
-		cout << "v0 " << vertices[v0] << endl;
-		cout << "p0 " << p0 << endl;
-		cout << "p1 " << p1 << endl;
+		//cout << "v0 " << vertices[v0] << endl;
+		//cout << "p0 " << p0 << endl;
+		//cout << "p1 " << p1 << endl;
 		N = p0 ^ p1;
 		p = (vertices[v0] + position -coor);
-		cout << p << endl;
+		//cout << p << endl;
 		p = vertices[v0] + position - coor;
 		V = N * p;
 		if (!islight) {
@@ -366,21 +366,21 @@ void Shape::hider(double x, double y, double z, bool islight)
 			cout << "face: " << i << " seno: " << seno << endl;
 			cout << "face: " << i << " N: " << N << endl;
 			cout << "face: " << i << " coor: " << coor << endl;
-			cout << "face: " << i << " par: " << par << endl;
-			cout << "face: " << i << " coordenada: " << coor << endl;
-			cout << "face: " << i << " parX * parX: " << par.x * par.x << endl;
-			cout << "face: " << i << " parY * parY: " << par.y * par.y << endl;
-			cout << "face: " << i << " parZ * parZ: " << par.z * par.z << endl;
-			cout << "face: " << i << " N.x * N.x: " << N.x * N.x << endl;
-			cout << "face: " << i << " N.y * N.y: " << N.y * N.y << endl;
-			cout << "face: " << i << " N.z * N.z: " << N.z * N.z << endl;
-			cout << "face: " << i << " x * x: " << x * x << endl;
-			cout << "face: " << i << " y * y: " << y * y << endl;
-			cout << "face: " << i << " z * z: " << z * z << endl;
-			cout << "face: " << i << " sqrt(par): " << raPar << endl;
-			cout << "face: " << i << " sqrt(N): " << raN << endl;
-			cout << "face: " << i << " sqrt(luz): " << raLuz << endl;
-			cout << "face: " << i << "sqrt(N) * sqrt(luz): " << raN * raLuz << endl;
+			//cout << "face: " << i << " par: " << par << endl;
+			//cout << "face: " << i << " coordenada: " << coor << endl;
+			//cout << "face: " << i << " parX * parX: " << par.x * par.x << endl;
+			//cout << "face: " << i << " parY * parY: " << par.y * par.y << endl;
+			//cout << "face: " << i << " parZ * parZ: " << par.z * par.z << endl;
+			//cout << "face: " << i << " N.x * N.x: " << N.x * N.x << endl;
+			//cout << "face: " << i << " N.y * N.y: " << N.y * N.y << endl;
+			//cout << "face: " << i << " N.z * N.z: " << N.z * N.z << endl;
+			//cout << "face: " << i << " x * x: " << x * x << endl;
+			//cout << "face: " << i << " y * y: " << y * y << endl;
+			//cout << "face: " << i << " z * z: " << z * z << endl;
+			//cout << "face: " << i << " sqrt(par): " << raPar << endl;
+			//cout << "face: " << i << " sqrt(N): " << raN << endl;
+			//cout << "face: " << i << " sqrt(luz): " << raLuz << endl;
+			//cout << "face: " << i << "sqrt(N) * sqrt(luz): " << raN * raLuz << endl;
 			seno = abs(seno);
 			if (V >= 0) {
 				faces[i].isLighted = true;
@@ -659,7 +659,7 @@ void Shape::printShape(SDL_Renderer* renderer, int width, int height, int mode) 
 				//*/
 				if (faces[fa].isLighted && mode == SOLID_WITH_LIGHT) {
 					//cout << "Iluminado " << fa << endl;
-					SDL_SetRenderDrawColor(renderer, 255 * faces[fa].seno, 165 * faces[fa].seno, 0 * faces[fa].seno, SDL_ALPHA_OPAQUE);
+					SDL_SetRenderDrawColor(renderer, 255, 165, 0, SDL_ALPHA_OPAQUE);
 					//cout <<"face: " << fa << " islight: " << faces[fa].seno << endl;
 				}
 				else {
@@ -767,6 +767,7 @@ void Shape::printShape(SDL_Renderer* renderer, int width, int height, int mode) 
 					if (k == 1) { k--; }
 				k--;
 				}
+				
 			}
 		}
 	}
