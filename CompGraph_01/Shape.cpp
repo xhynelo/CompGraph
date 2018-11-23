@@ -485,6 +485,37 @@ struct EdgeBucket
 
 EdgeBucket::EdgeBucket() {}
 
+EdgeBucket addToBucket( int Xdi, int Ydi, int Xdf, int Ydf) {
+	EdgeBucket nEB;
+	nEB.dy = Ydi - Ydf;
+	if (nEB.dy != 0)
+	{
+		nEB.dx = Xdi - Xdf;
+		if (nEB.dx < 0)
+		{
+			nEB.dx = -nEB.dx;
+		}
+		if (nEB.dy > 0)
+		{
+			nEB.yMax = Ydi;
+			nEB.yMin = Ydf;
+			nEB.x = Xdf;
+			nEB.sign = -1;
+		}
+		else
+		{
+			nEB.yMax = Ydf;
+			nEB.yMin = Ydi;
+			nEB.x = Xdf;
+			nEB.sign = 1;
+			nEB.dy = -nEB.dy;
+		}
+		nEB.sum = 0;
+		nEB.key = nEB.yMin;
+		return nEB;
+	}
+}
+
 void Shape::printShape(SDL_Renderer* renderer, int width, int height, int mode) // Print usando faces
 {
 	int w, h, fa;
@@ -511,46 +542,8 @@ void Shape::printShape(SDL_Renderer* renderer, int width, int height, int mode) 
 				//cout << Xdi << " " << Ydi << " " << Xdf << " " << Ydf << endl;
 				if(mode != WIRE_FRAME)
 				{
-					int k = 1;
-					vector<Face> divs;
-					if (fa == 0 || fa == faces.size() - 1)
-					{ 
-						Face f1, f2, f3;
-						f1.edges.push_back(faces[fa].edges[9]);
-						pair<int, int> e;
-						//----------------------------------bah
-						k = 3; 
-					}
-					while (k > 0) {
-						EdgeBucket nEB;
-						nEB.dy = Ydi - Ydf;
-						if (nEB.dy != 0)
-						{
-							nEB.dx = Xdi - Xdf;
-							if (nEB.dx < 0)
-							{
-								nEB.dx = -nEB.dx;
-							}
-							if (nEB.dy > 0)
-							{
-								nEB.yMax = Ydi;
-								nEB.yMin = Ydf;
-								nEB.x = Xdf;
-								nEB.sign = -1;
-							}
-							else
-							{
-								nEB.yMax = Ydf;
-								nEB.yMin = Ydi;
-								nEB.x = Xdf;
-								nEB.sign = 1;
-								nEB.dy = -nEB.dy;
-							}
-							nEB.sum = 0;
-							nEB.key = nEB.yMin;
-							ET.push_back(nEB);
-						}
-						k--;
+					if (Ydi != Ydf) {
+						ET.push_back(addToBucket(Xdi, Ydi, Xdf, Ydf));
 					}
 				}
 				if (mode == WIRE_FRAME) 
@@ -565,6 +558,38 @@ void Shape::printShape(SDL_Renderer* renderer, int width, int height, int mode) 
 			}
 			std::sort(ET.begin(), ET.end());
 			if (mode != WIRE_FRAME) {
+				cout << "ET empty: " << ET.empty() << endl;
+				int k = 0;
+				//vector<vector<EdgeBucket>> divs;
+				/*
+				if (fa == 0 || fa == faces.size() - 1)
+				{
+					ET.clear;
+					ET.push_back(faces[fa].edges[9]);
+					Xdi = (int)(((this->x(edges[*edge].first) + position.x * position.scale) * width) / this->width);
+					Ydi = (int)(((this->y(edges[*edge].first) + position.y * position.scale) * -height) / this->height + height);
+					Xdf = (int)(((this->x(edges[*edge].second) + position.x * position.scale) * width) / this->width);
+					Ydf = (int)(((this->y(edges[*edge].second) + position.y * position.scale) * -height) / this->height + height);
+				
+					f1.edges.push_back(faces[fa].edges[0]);
+					f1.edges.push_back(faces[fa].edges[1]);
+					f2.edges.push_back(faces[fa].edges[2]);
+					f2.edges.push_back(faces[fa].edges[6]);
+					f2.edges.push_back(faces[fa].edges[7]);
+					f2.edges.push_back(faces[fa].edges[8]);
+					f3.edges.push_back(faces[fa].edges[3]);
+					f3.edges.push_back(faces[fa].edges[4]);
+					f3.edges.push_back(faces[fa].edges[5]);
+					pair<int, int> e1, e2;
+					e1.first = 9 + faces[fa].edges[0];
+					e1.second = 2 + faces[fa].edges[0];
+					e2.first = 3 + faces[fa].edges[0];
+					e2.second = 6 + faces[fa].edges[0];
+
+
+					k = 3;
+				}
+				//*/
 				if (faces[fa].isLighted && mode == SOLID_WITH_LIGHT) {
 					//cout << "Iluminado " << fa << endl;
 					SDL_SetRenderDrawColor(renderer, 255 * faces[fa].seno, 165 * faces[fa].seno, 0 * faces[fa].seno, SDL_ALPHA_OPAQUE);
@@ -580,57 +605,59 @@ void Shape::printShape(SDL_Renderer* renderer, int width, int height, int mode) 
 					SDL_SetRenderDrawColor(renderer, 255 * r / 9, 255 * g / 9, 255 * b / 9, SDL_ALPHA_OPAQUE);
 					//SDL_SetRenderDrawColor(renderer, 128, 128, 128, SDL_ALPHA_OPAQUE);
 				}
-				
-				int y = ET[0].yMin;
-				while (!ET.empty()) {
-					if (!AL.empty()) {
-						int i = 0;
-						int j = AL.size();
-						while (i < j) {
-							if (AL[i].yMax == y) {
-								AL.erase(AL.begin() + i);
-								j--;
+				while (k >= 0) {
+					int y = ET[0].yMin;
+					while (!ET.empty()) {
+						if (!AL.empty()) {
+							int i = 0;
+							int j = AL.size();
+							while (i < j) {
+								if (AL[i].yMax == y) {
+									AL.erase(AL.begin() + i);
+									j--;
+								}
+								else { i++; }
 							}
-							else { i++; }
-						}
-						i = 0;
-						j = ET.size();
-						while (i < j) {
-							if (ET[i].yMax == y) {
-								ET.erase(ET.begin() + i);
-								j--;
+							i = 0;
+							j = ET.size();
+							while (i < j) {
+								if (ET[i].yMax == y) {
+									ET.erase(ET.begin() + i);
+									j--;
+								}
+								else { i++; }
 							}
-							else { i++; }
 						}
-					}
-					for (int i = 0; i < ET.size(); ++i) {
-						if (ET[i].yMin == y)
-						{
-							AL.push_back(ET[i]);
-							AL[AL.size()-1].key = AL[AL.size() - 1].x;
+						for (int i = 0; i < ET.size(); ++i) {
+							if (ET[i].yMin == y)
+							{
+								AL.push_back(ET[i]);
+								AL[AL.size() - 1].key = AL[AL.size() - 1].x;
+							}
 						}
-					}
-					std::sort(AL.begin(), AL.end());
-					//cout << AL.size() << endl;
-					int tam = AL.size();
-					for (int i = 0; i < tam-1; i++) {
-						//cout << AL[i].x << endl;
-						SDL_RenderDrawLine(
-							renderer,
-							AL[i].x, y,
-							AL[i+1].x, y
-						);
-					}
-					for (int i = 0; i < AL.size(); ++i) {
-						if (AL[i].dx != 0) {
-							AL[i].sum += AL[i].dx;
+						std::sort(AL.begin(), AL.end());
+						//cout << AL.size() << endl;
+						int tam = AL.size();
+						for (int i = 0; i < tam - 1; i++) {
+							//cout << AL[i].x << endl;
+							SDL_RenderDrawLine(
+								renderer,
+								AL[i].x, y,
+								AL[i + 1].x, y
+							);
 						}
-						while (AL[i].sum >= AL[i].dy) {
-							AL[i].x += AL[i].sign;
-							AL[i].sum -= AL[i].dy;
+						for (int i = 0; i < AL.size(); ++i) {
+							if (AL[i].dx != 0) {
+								AL[i].sum += AL[i].dx;
+							}
+							while (AL[i].sum >= AL[i].dy) {
+								AL[i].x += AL[i].sign;
+								AL[i].sum -= AL[i].dy;
+							}
 						}
+						y++;
 					}
-					y++;
+					k--;
 				}
 			}
 		}
