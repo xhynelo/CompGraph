@@ -88,6 +88,8 @@ class Shape
 		void printShape(SDL_Renderer* renderer, int width, int height, int mode);
 		void metaShape(SDL_Renderer* renderer, int width, int height);
 		void readShape(string name);
+		int convertWidth(double x, int width, int height);
+		int convertHeight(double y, int width, int height);
 
 		vector<vector<double>> matrixMult(vector<vector<double>> mat1, vector<vector<double>> mat2);
 };

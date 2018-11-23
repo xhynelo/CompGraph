@@ -2,6 +2,7 @@
 #include "Shape.h"
 
 #include <cmath>
+#include <algorithm>
 
 Shape::Shape()
 {
@@ -396,30 +397,65 @@ void Shape::hider(double x, double y, double z, bool islight)
 
 void Shape::slide(double tam)
 {
-	int i, ver = v;
+	int i, j, ver = v, fac = f, edg = e;
 	for (i = 0; i < ver; i++) {
 		addVertex(vertices[i].x + position.x + 1, vertices[i].y + position.y);
-		addEdge(i, i + ver);
+
 		vertices[i + ver].scale = vertices[i].scale;
 		vertices[i + ver].z = tam - position.z;
 	}
-	for (i = ver; i < v - 1; i++) addEdge(i+ 1, i);
-	addEdge(v - 1, ver);
+	for (i = 0; i < edg; i++) {
+		addEdge(edges[i].first + 10, edges[i].second + 10);
+	}
+
+
 	vector<int> arestas;
-	for (i = 0; i < 9; i++) {
+	//cout << faces.size() << endl;
+	for (i = 0; i < fac; i++) {
 		arestas.clear();
-		arestas.push_back(i);
-		arestas.push_back(i + 11);
-		arestas.push_back(i + 20);
-		arestas.push_back(i + 10);
+		for (auto it2 = faces[i].edges.begin(); it2 != faces[i].edges.end(); ++it2) {
+			arestas.push_back(*it2 + 17);
+		}
+		std::reverse(arestas.begin(), arestas.end());
 		addFace(arestas, 900);
 	}
-	arestas.clear();
-	arestas = { 9, 10, 29, 19 };
-	addFace(arestas, 50);
-	arestas.clear();
-	for (i = 20; i < 30; i++) { arestas.push_back(i); }
-	addFace(arestas, 9);
+
+
+
+	int c = 34;
+	addEdge(0, 0 + 10);
+	for (i = 1; i < ver; ++i) {
+		addEdge(i - 1, i + 10);
+		addEdge(i, i + 10);
+
+		arestas.clear();
+		arestas.push_back(c);
+		arestas.push_back(c + 1);
+		arestas.push_back(i + 16);
+		addFace(arestas, 900);
+
+		c += 1;
+
+		arestas.clear();
+		arestas.push_back(c);
+		arestas.push_back(i - 1);
+		arestas.push_back(c + 1);
+		addFace(arestas, 900);
+
+		c += 1;
+	}
+	addEdge(9, 10);
+	arestas = { 53, 26, 52 };
+	addFace(arestas, 900);
+
+	arestas = { 34, 53, 9 };
+	addFace(arestas, 900);
+
+//arestas = { 9, 10, 29, 19 };
+	//addFace(arestas, 50);
+	//arestas.clear();
+	//for (i = 20; i < 30; i++) { arestas.push_back(i); }
+	//addFace(arestas, 9);
 	iter_swap(faces.begin(), faces.end()-1);
 }
 
@@ -526,6 +562,15 @@ EdgeBucket addToBucket( int Xdi, int Ydi, int Xdf, int Ydf) {
 	}
 }
 
+int Shape::convertWidth(double x, int width, int height) {
+	return (int)(((x + position.x * position.scale) * width) / this->width);
+}
+
+
+int Shape::convertHeight(double y, int width, int height) {
+	return (int)(((y + position.y * position.scale) * -height) / this->height + height);
+}
+
 void Shape::printShape(SDL_Renderer* renderer, int width, int height, int mode) // Print usando faces
 {
 	int w, h, fa;
@@ -574,8 +619,8 @@ void Shape::printShape(SDL_Renderer* renderer, int width, int height, int mode) 
 				/*
 				if (fa == 0 || fa == faces.size() - 1)
 				{
-					int i = edges[faces[fa].edges[0]].first, j = i + 9;
-					k = 14;
+					int i = edges[faces[fa].edges[0]].first, j = i;
+					k = 3;
 					ET.clear();
 					while (k> 0) {
 						Xdi = (int)(((this->x(i) + position.x * position.scale) * width) / this->width);
@@ -627,6 +672,44 @@ void Shape::printShape(SDL_Renderer* renderer, int width, int height, int mode) 
 					SDL_SetRenderDrawColor(renderer, 255 * r / 9, 255 * g / 9, 255 * b / 9, SDL_ALPHA_OPAQUE);
 					//SDL_SetRenderDrawColor(renderer, 128, 128, 128, SDL_ALPHA_OPAQUE);
 				}
+				/*
+				Vertex va0 = vertices[edges[faces[fa].edges[0]].first];
+				Vertex va1 = vertices[edges[faces[fa].edges[0]].second];
+				Vertex vb0 = vertices[edges[faces[fa].edges[1]].first];
+				Vertex vb1 = vertices[edges[faces[fa].edges[1]].second];
+				vector<double> ys = {
+					va0.y,
+					va1.y,
+					vb0.y,
+					vb1.y
+				};
+				double yMin = *min_element(ys.begin(), ys.end());
+				double yMax = *max_element(ys.begin(), ys.end());
+
+				int yiMin = convertHeight(yMin, width, height);
+				int yiMax = convertHeight(yMax, width, height);
+
+
+				for (int yi = yiMax; yi <= yiMin; yi++) {
+					double y = yMax + (double)(yi - yiMin) / (yiMax - yiMin) * (yMax - yMin);
+					vector<double> xs = {
+						va0.x * y / va0.y,
+						va1.x * y / va1.y,
+						vb0.x * y / vb0.y,
+						vb1.x * y / vb1.y
+					};
+					int xMin = convertWidth(*min_element(xs.begin(), xs.end()), width, height);
+					int xMax = convertWidth(*max_element(xs.begin(), xs.end()), width, height);
+
+					//cout << AL[i].x << endl;
+					SDL_RenderDrawLine(
+						renderer,
+						xMin, yi,
+						xMax, yi
+					);
+				}
+				*/
+				
 				while (k >= 0) {
 					if (k > 0) { ET.swap(divs[k-1]); }
 
@@ -682,7 +765,7 @@ void Shape::printShape(SDL_Renderer* renderer, int width, int height, int mode) 
 						y++;
 					}
 					if (k == 1) { k--; }
-					k--;
+				k--;
 				}
 			}
 		}
