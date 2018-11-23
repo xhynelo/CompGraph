@@ -18,6 +18,7 @@ struct Face
 	vector<int> edges;
 	bool isVisible;
 	bool isLighted;
+	double seno;
 	
 	Face();
 };
@@ -32,11 +33,18 @@ struct Vertex
 	
 
 	Vertex(double mX, double mY);
+	Vertex(double mX, double mY, double mZ);
 	Vertex();
 	double& operator[](int i);
+	Vertex operator-(const Vertex &vertex) const;
+	Vertex operator+(const Vertex &vertex) const;
+	Vertex operator^(const Vertex &vertex) const;
+	double operator*(const Vertex &vertex) const;
 	friend std::istream& operator>>(std::istream &is, Vertex &vertex);
 	friend std::ostream& operator<<(std::ostream &is, Vertex &vertex);
 	bool operator ==(const Vertex &b) const;
+
+	double modulo();
 };
 
 class Shape
