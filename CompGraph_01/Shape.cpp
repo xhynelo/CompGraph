@@ -300,6 +300,10 @@ void Shape::hider(double x, double y, double z, bool islight)
 	Vertex N, p;
 	Vertex coor(x, y, z);
 	for (int i = 0; i < f; i++) {
+		cout << "a[0] " << vertices[edges[faces[i].edges[0]].first] << endl;
+		cout << "a[1] " << vertices[edges[faces[i].edges[0]].second] << endl;
+		cout << "b[0] " << vertices[edges[faces[i].edges[1]].first] << endl;
+		cout << "b[1] " << vertices[edges[faces[i].edges[1]].second] << endl;
 		if (edges[faces[i].edges[0]].first == edges[faces[i].edges[1]].first) {
 			cout << "Triangulo " << i << " " << 1 << endl;
 			p0 = vertices[edges[faces[i].edges[0]].first] - vertices[edges[faces[i].edges[0]].second];
@@ -328,8 +332,12 @@ void Shape::hider(double x, double y, double z, bool islight)
 			p1 = vertices[edges[faces[i].edges[1]].second] - vertices[edges[faces[i].edges[1]].first];
 			v0 = edges[faces[i].edges[0]].second;
 		}
-		
+		cout << "v0 " << vertices[v0] << endl;
+		cout << "p0 " << p0 << endl;
+		cout << "p1 " << p1 << endl;
 		N = p0 ^ p1;
+		p = (vertices[v0] + position -coor);
+		cout << p << endl;
 		p = vertices[v0] + position - coor;
 		V = N * p;
 		if (!islight) {
@@ -353,6 +361,7 @@ void Shape::hider(double x, double y, double z, bool islight)
 			}
 
 		
+			cout << "face: " << i << " lighted: " << (V > 0) << endl;
 			cout << "face: " << i << " seno: " << seno << endl;
 			cout << "face: " << i << " N: " << N << endl;
 			cout << "face: " << i << " coor: " << coor << endl;
@@ -371,9 +380,12 @@ void Shape::hider(double x, double y, double z, bool islight)
 			cout << "face: " << i << " sqrt(N): " << raN << endl;
 			cout << "face: " << i << " sqrt(luz): " << raLuz << endl;
 			cout << "face: " << i << "sqrt(N) * sqrt(luz): " << raN * raLuz << endl;
+			if (seno < 0) {
+				seno = 0;
+			}
 			if (V >= 0) {
 				faces[i].isLighted = true;
-				faces[i].seno = abs(seno);
+				faces[i].seno = seno;
 			}
 			else {
 				faces[i].isLighted = false;
@@ -558,7 +570,7 @@ void Shape::printShape(SDL_Renderer* renderer, int width, int height, int mode) 
 			}
 			std::sort(ET.begin(), ET.end());
 			if (mode != WIRE_FRAME) {
-				cout << "ET empty: " << ET.empty() << endl;
+				//cout << "ET empty: " << ET.empty() << endl;
 				int k = 0;
 				//vector<vector<EdgeBucket>> divs;
 				/*
