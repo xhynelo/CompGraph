@@ -307,13 +307,13 @@ void Shape::hider(double x, double y, double z, bool islight)
 		if (edges[faces[i].edges[0]].first == edges[faces[i].edges[1]].first) {
 			cout << "Triangulo " << i << " " << 1 << endl;
 			p0 = vertices[edges[faces[i].edges[0]].first] - vertices[edges[faces[i].edges[0]].second];
-			p1 = vertices[edges[faces[i].edges[1]].first] - vertices[edges[faces[i].edges[1]].second];
+			p1 = vertices[edges[faces[i].edges[1]].second] - vertices[edges[faces[i].edges[0]].second];
 			v0 = edges[faces[i].edges[0]].first;
 		}
 		else if (edges[faces[i].edges[0]].first == edges[faces[i].edges[1]].second) {
 			cout << "Triangulo " << i << " " << 2 << endl;
 			p0 = vertices[edges[faces[i].edges[0]].first] - vertices[edges[faces[i].edges[0]].second];
-			p1 = vertices[edges[faces[i].edges[1]].second] - vertices[edges[faces[i].edges[1]].first];
+			p1 = vertices[edges[faces[i].edges[1]].first] - vertices[edges[faces[i].edges[0]].second];
 			
 			v0 = edges[faces[i].edges[0]].first;
 
@@ -322,15 +322,15 @@ void Shape::hider(double x, double y, double z, bool islight)
 			cout << "Triangulo " << i << " " << 3 << endl;
 			
 			p0 = vertices[edges[faces[i].edges[0]].second] - vertices[edges[faces[i].edges[0]].first];
-			p1 = vertices[edges[faces[i].edges[1]].first] - vertices[edges[faces[i].edges[1]].second];
-			v0 = edges[faces[i].edges[0]].second;
+			p1 = vertices[edges[faces[i].edges[1]].second] - vertices[edges[faces[i].edges[0]].first];
+			v0 = edges[faces[i].edges[0]].first;
 
 		}
 		else {
 			cout << "Triangulo " << i << " " << 4 << endl;
 			p0 = vertices[edges[faces[i].edges[0]].second] - vertices[edges[faces[i].edges[0]].first];
-			p1 = vertices[edges[faces[i].edges[1]].second] - vertices[edges[faces[i].edges[1]].first];
-			v0 = edges[faces[i].edges[0]].second;
+			p1 = vertices[edges[faces[i].edges[1]].first] - vertices[edges[faces[i].edges[0]].first];
+			v0 = edges[faces[i].edges[0]].first;
 		}
 		cout << "v0 " << vertices[v0] << endl;
 		cout << "p0 " << p0 << endl;
@@ -380,9 +380,7 @@ void Shape::hider(double x, double y, double z, bool islight)
 			cout << "face: " << i << " sqrt(N): " << raN << endl;
 			cout << "face: " << i << " sqrt(luz): " << raLuz << endl;
 			cout << "face: " << i << "sqrt(N) * sqrt(luz): " << raN * raLuz << endl;
-			if (seno < 0) {
-				seno = 0;
-			}
+			seno = abs(seno);
 			if (V >= 0) {
 				faces[i].isLighted = true;
 				faces[i].seno = seno;
@@ -573,7 +571,7 @@ void Shape::printShape(SDL_Renderer* renderer, int width, int height, int mode) 
 				//cout << "ET empty: " << ET.empty() << endl;
 				int k = 0;
 				vector<vector<EdgeBucket>> divs;
-				//*
+				/*
 				if (fa == 0 || fa == faces.size() - 1)
 				{
 					int i = edges[faces[fa].edges[0]].first, j = i + 9;
