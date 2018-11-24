@@ -549,16 +549,19 @@ int Shape::convertHeight(double y, int width, int height) {
 
 int _gfxPrimitivesCompareInt(const void *a, const void *b)
 {
+	// Code from SDL gfx: https://github.com/keera-studios/SDL2_gfx
 	return (*(const int *)a) - (*(const int *)b);
 }
 
 int hline(SDL_Renderer * renderer, Sint16 x1, Sint16 x2, Sint16 y)
 {
+	// Code from SDL gfx: https://github.com/keera-studios/SDL2_gfx
 	return SDL_RenderDrawLine(renderer, x1, y, x2, y);;
 }
 
 int filledPolygonRGBAMT(SDL_Renderer * renderer, const Sint16 * vx, const Sint16 * vy, int n, Uint8 r, Uint8 g, Uint8 b, Uint8 a, int **polyInts, int *polyAllocated)
 {
+	// Code from SDL gfx: https://github.com/keera-studios/SDL2_gfx
 	int result;
 	int i;
 	int y, xa, xb;
