@@ -49,7 +49,7 @@ struct Vertex
 
 class Shape
 {
-	vector<Face> faces;
+	//vector<Face> faces;
 	vector<Vertex> vertices;
 	vector<pair<int, int>> edges;
 	//number of elements on the above arrays
@@ -64,6 +64,7 @@ class Shape
 
 	public:
 		Shape();
+		vector<Face> faces;
 
 		double x(int n);
 		double y(int n);
@@ -86,10 +87,16 @@ class Shape
 		void slide(double tam);
 		void projection(double theta);
 		void printShape(SDL_Renderer* renderer, int width, int height, int mode);
-		void metaShape(SDL_Renderer* renderer, int width, int height);
+		void metaShape();
 		void readShape(string name);
 		int convertWidth(double x, int width, int height);
 		int convertHeight(double y, int width, int height);
+		bool DrawFilledPolygon(Face poly, SDL_Renderer* renderer);
+		double minVertex();
+		
+		vector<Vertex> sortFace(Face poly);
+
 
 		vector<vector<double>> matrixMult(vector<vector<double>> mat1, vector<vector<double>> mat2);
 };
+
