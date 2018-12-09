@@ -54,6 +54,7 @@ class Shape
 {
 	//vector<Face> faces;
 	vector<Vertex> vertices;
+	vector<Vertex> verticesSalvo;
 	vector<pair<int, int>> edges;
 	map<int, pair<Vertex, Vertex>> curvas;
 	//number of elements on the above arrays
@@ -74,7 +75,7 @@ class Shape
 		double y(int n);
 		double z(int n);
 		double getV();
-		double degree;
+		double degree = 0;
 
 		vector<vector<double>> matrix;
 		

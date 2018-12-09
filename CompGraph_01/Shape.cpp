@@ -111,7 +111,7 @@ std::istream & operator>>(std::istream & is, Vertex & vertex)
 
 std::ostream & operator<<(std::ostream & is, Vertex & vertex)
 {
-	is << vertex.x << " " << vertex.y << " " << vertex.z;
+	is << vertex.x << " " << vertex.y << " " << vertex.z << " " << vertex.scale;
 	return is;
 }
 
@@ -128,9 +128,13 @@ void Shape::addVertex(Vertex v)
 {
 	if (!this->v) position = v;
 	v.x = v.x - position.x;
+	//v.x = v.x - position.x;
 	v.y = v.y - position.y;
+	//v.y = v.y - position.y;
 	v.z = v.z - position.z;
+	//v.z = v.z - position.z;
 
+	verticesSalvo.push_back(v);
 	vertices.push_back(v);
 	this->v++;
 }
@@ -279,15 +283,30 @@ void Shape::rotate(double theta)
 
 void Shape::rotateQ(double theta, int x, int y, int z) {
 	theta = theta / 180.0 * M_PI;
+	//if (x < 0) x = -x;
+	//if (y < 0) y = -y;
+	//if (z < 0) z = -z;
 	pair<double, Vertex> q, q_;
 	q = pair<double, Vertex>(cos(theta / 2), Vertex(x, y, z)*sin(theta / 2));
 	q_ = pair<double, Vertex>(cos(theta / 2), Vertex(x, y, z)*-sin(theta / 2));
+	//position = (
+	//	(position * (q.first*q.first))
+	//	- (position * (q.second*q.second))
+	//	+ (q.second*(q.second*position) * 2.0)
+	//	+ ((q.second % position) * q.first * 2.0)
+	//	);
 	int i = 0;
 	for (i = 0; i < v; i++) {
 		cout << i << "antes: " << vertices[i] << endl;
-		vertices[i] = (vertices[i] * (q.first*q.first)) - (vertices[i] * (q.second*q.second)) + (q.second*(q.second*vertices[i]) * 2.0) + (((q.second * q.first * 2.0) % vertices[i]));
+		vertices[i] = (
+			(verticesSalvo[i] * (q.first*q.first))
+			- (verticesSalvo[i] * (q.second*q.second))
+			+ (q.second*(q.second*verticesSalvo[i]) * 2.0)
+			+ ((q.second % verticesSalvo[i]) * q.first * 2.0)
+		);
 		cout << i << "depois: " << vertices[i] << endl;
 	}
+
 }
 
 void Shape::rotate(double thetaX, double thetaY, double thetaZ){
@@ -463,6 +482,7 @@ void Shape::slide(double tam)
 
 		vertices[i + ver].scale = vertices[i].scale;
 		vertices[i + ver].z = tam - position.z;
+		verticesSalvo[i + ver].z = tam - position.z;
 	}
 	for (i = 0; i < edg; i++) {
 		addEdge(edges[i].first + 10, edges[i].second + 10);
