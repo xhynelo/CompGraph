@@ -77,6 +77,18 @@ double Vertex::operator*(const Vertex &vertex) const {
 }
 
 
+Vertex Vertex::operator*(const double &v) const {
+	return Vertex(x*v, y*v, z*v);
+}
+
+Vertex Vertex::operator%(const Vertex &v) const {
+	return Vertex(
+		y * v.z - v.y * z,
+		x * v.z - v.x * z,
+		x * v.y - v.x * y
+	);
+}
+
 double& Vertex::operator[](int i) {
 	switch (i)
 	{
@@ -128,6 +140,12 @@ void Shape::addEdge(int v1, int v2)
 	if (v <= v1 || v <= v2) return;
 	edges.push_back(pair<int, int>(v1, v2));
 	e++;
+}
+
+void Shape::addEdgeCurva(int v1, int v2, Vertex v3, Vertex v4) {
+	if (v <= v1 || v <= v2) return;
+	addEdge(v1, v2);
+	curvas[e - 1] = pair<Vertex, Vertex>(v3, v4);
 }
 
 Face::Face() : color(0), isVisible(true), isLighted(false) {}
@@ -228,8 +246,8 @@ void Shape::rotate(double theta)
 		{0, 0, 0, 1}
 	};
 	//cout << "sqrt(theta): " << sqrt(theta) << endl;
-	Vertex aux;
-	double sum;
+	Vertex aux, aux2;
+	double sum, duba;
 	int i, j, k;
 	for (j = 0; j < this->v; j++) {
 		for (i = 0; i < 4; i++) {
@@ -243,6 +261,33 @@ void Shape::rotate(double theta)
 		//cout << aux << endl;
 	}
 
+	for (auto w = curvas.begin(); w != curvas.end(); w++) {
+		for (i = 0; i < 4; i++) {
+			sum = 0;
+			duba = 0;
+			for (k = 0; k < 4; k++) {
+				sum += w->second.first[k] * rotate[k][i];
+				duba += w->second.second[k] * rotate[k][i];
+			}
+			aux[i] = sum;
+			aux[2] = duba;
+		}
+		w->second.first = aux;
+		w->second.first = aux2;
+	}
+}
+
+void Shape::rotateQ(double theta, int x, int y, int z) {
+	theta = theta / 180.0 * M_PI;
+	pair<double, Vertex> q, q_;
+	q = pair<double, Vertex>(cos(theta / 2), Vertex(x, y, z)*sin(theta / 2));
+	q_ = pair<double, Vertex>(cos(theta / 2), Vertex(x, y, z)*-sin(theta / 2));
+	int i = 0;
+	for (i = 0; i < v; i++) {
+		cout << i << "antes: " << vertices[i] << endl;
+		vertices[i] = (vertices[i] * (q.first*q.first)) - (vertices[i] * (q.second*q.second)) + (q.second*(q.second*vertices[i]) * 2.0) + (((q.second * q.first * 2.0) % vertices[i]));
+		cout << i << "depois: " << vertices[i] << endl;
+	}
 }
 
 void Shape::rotate(double thetaX, double thetaY, double thetaZ){
@@ -421,6 +466,9 @@ void Shape::slide(double tam)
 	}
 	for (i = 0; i < edg; i++) {
 		addEdge(edges[i].first + 10, edges[i].second + 10);
+		if (curvas.find(i) != curvas.end()) {
+			curvas[e - 1] = curvas[i];
+		}
 	}
 
 
@@ -482,8 +530,9 @@ void Shape::slide(double tam)
 
 void Shape::projection(double theta)
 {
-	theta = M_PI * theta / 180;
-	double cosT = cos(theta), sinT = sin(theta), sum = 0;
+	degree = M_PI * theta / 180;
+	/*
+	double cosT = cos(degree), sinT = sin(degree), sum = 0;
 	int i, j, k;
 	vector<vector<double>> projc = { {1, 0, 0, 0},
 									 {0, 1, 0, 0},
@@ -504,6 +553,7 @@ void Shape::projection(double theta)
 		vertices[j].z = temp[2];
 		vertices[j].scale = temp[3];
 	}
+	//*/
 }
 
 /*
@@ -754,11 +804,20 @@ void Shape::printShape(SDL_Renderer* renderer, int width, int height, int mode) 
 
 			for (int i = 0; i < novo.size(); i++) {
 				Vertex &atual = novo[i];
+				//*
+				Xdi = (int)((((ultimo.x + ultimo.z * cos(degree)) + position.x * position.scale) * width) / this->width);
+				Ydi = (int)((((ultimo.y + ultimo.z * sin(degree)) + position.y * position.scale) * -height) / this->height + height);
+				Xdf = (int)((((atual.x + atual.z * cos(degree)) + position.x * position.scale) * width) / this->width);
+				Ydf = (int)((((atual.y + atual.z * sin(degree)) + position.y * position.scale) * -height) / this->height + height);
+
+
+				//*/
+				/*
 				Xdi = (int)(((ultimo.x + position.x * position.scale) * width) / this->width);
 				Ydi = (int)(((ultimo.y + position.y * position.scale) * -height) / this->height + height);
 				Xdf = (int)(((atual.x + position.x * position.scale) * width) / this->width);
 				Ydf = (int)(((atual.y + position.y * position.scale) * -height) / this->height + height);
-			
+				//*/
 				if (mode != WIRE_FRAME)
 				{
 					vx[i] = (Sint16)Xdf;
@@ -875,6 +934,68 @@ vector<vector<double>> Shape::matrixMult(vector<vector<double>> mat1, vector<vec
 
 vector<Vertex> Shape::sortFace(Face poly) {
 	vector<Vertex> vertics;
+	int steps = 30;
+	int vertic, primeiro;
+	if (edges[poly.edges[0]].first == edges[poly.edges[1]].first) {
+		vertic = edges[poly.edges[0]].second;
+	}
+	else if (edges[poly.edges[0]].first == edges[poly.edges[1]].second) {
+		vertic = edges[poly.edges[0]].second;
+	}
+	else if (edges[poly.edges[0]].second == edges[poly.edges[1]].first) {
+		vertic = edges[poly.edges[0]].first;
+	}
+	else {
+		vertic = edges[poly.edges[0]].first;
+	}
+	Vertex p1 = vertices[vertic];
+	primeiro = vertic;
+	vertics.push_back(vertices[primeiro]);
+	for (int i = 0; i < poly.edges.size(); i++) {
+		Vertex p2;
+
+		if (vertic == edges[poly.edges[i]].first) {
+			p2 = vertices[edges[poly.edges[i]].second];
+			vertic = edges[poly.edges[i]].second;
+		}
+		else {
+			p2 = vertices[edges[poly.edges[i]].first];
+			vertic = edges[poly.edges[i]].first;
+		}
+
+		if (curvas.find(poly.edges[i]) != curvas.end()) {
+			Vertex t1 = curvas[poly.edges[i]].first + position;
+			Vertex t2 = curvas[poly.edges[i]].second + position;
+			for (int t = 0; t <= steps; t++) {
+				double s = (double)t / (double)steps;
+				double h1 = - s*s*s + 3 * s*s -3 *s + 1;
+				double h2 = 3 * s*s*s - 6 * s*s +3 *s;
+				double h3 = -3 * s*s*s + 3 * s*s;
+				double h4 = 3 * s*s*s;
+				/*
+				double h1 = 2 * s*s*s - 3 * s*s + 1;
+				double h2 = -2 * s*s*s + 3 * s*s;
+				double h3 = s * s*s - 2 * s*s + s;
+				double h4 = s * s*s - s * s;
+				//*/
+				Vertex p = p1 * h1 + p2 * h2 + t1 * h3 + t2 * h4;
+				p.z = p1.z;
+				vertics.push_back(p);
+				//cout << poly.edges[i] << " interpolado " << p << endl;
+			}
+		}
+		else {
+			vertics.push_back(p2);
+			//cout << "padrao " << p2 << endl;
+		}
+		p1 = p2;
+
+	}
+	vertics.push_back(vertices[primeiro]);
+
+	/*
+	vector<Vertex> vertics;
+	int steps = 30;
 	int vertic;
 	if (edges[poly.edges[0]].first == edges[poly.edges[1]].first) {
 		vertics.push_back(vertices[edges[poly.edges[0]].second]);
@@ -898,15 +1019,38 @@ vector<Vertex> Shape::sortFace(Face poly) {
 	}
 
 	for (int i = 1; i < poly.edges.size(); i++) {
+		Vertex atual;
+
 		if (vertic == edges[poly.edges[i]].first) {
-			vertics.push_back(vertices[edges[poly.edges[i]].second]);
+			atual = vertices[edges[poly.edges[i]].second];
 			vertic = edges[poly.edges[i]].second;
 		}
 		else {
-			vertics.push_back(vertices[edges[poly.edges[i]].first]);
+			atual = vertices[edges[poly.edges[i]].first];
 			vertic = edges[poly.edges[i]].first;
 		}
-	}
+
+		if (curvas.find(poly.edges[i]) != curvas.end()) {
+			cout << "atual " << atual << " vertic " << vertices[vertic] << endl;
+			Vertex t1 = curvas[poly.edges[i]].first;
+			Vertex t2 = curvas[poly.edges[i]].second;
+			for (int t = 0; t <= steps; t++) {
+				double s = (double)t / (double)steps;
+				double h1 = 2 * s*s*s - 3 * s*s + 1;
+				double h2 = -2 * s*s*s + 3 * s*s;
+				double h3 = s*s*s - 2 * s*s + s;
+				double h4 = s*s*s - s*s;
+				Vertex p = atual * h1 + vertices[vertic] * h2 + t1 * h3 + t2 * h4;
+				vertics.push_back(p);
+				cout << poly.edges[i] <<" interpolado " << p << endl;
+			}
+		}
+		else {
+			vertics.push_back(atual);
+			cout << "padrao " << atual << endl;
+		}
+		
+	}//*/
 	return vertics;
 }
 
