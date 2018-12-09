@@ -127,11 +127,11 @@ void Shape::addVertex(double x, double y)
 void Shape::addVertex(Vertex v)
 {
 	if (!this->v) position = v;
-	v.x = v.x - position.x;
+	v.x = v.x;
 	//v.x = v.x - position.x;
-	v.y = v.y - position.y;
+	v.y = v.y;
 	//v.y = v.y - position.y;
-	v.z = v.z - position.z;
+	v.z = v.z;
 	//v.z = v.z - position.z;
 
 	verticesSalvo.push_back(v);
@@ -150,6 +150,7 @@ void Shape::addEdgeCurva(int v1, int v2, Vertex v3, Vertex v4) {
 	if (v <= v1 || v <= v2) return;
 	addEdge(v1, v2);
 	curvas[e - 1] = pair<Vertex, Vertex>(v3, v4);
+	curvasSalvo[e - 1] = pair<Vertex, Vertex>(v3, v4);
 }
 
 Face::Face() : color(0), isVisible(true), isLighted(false) {}
@@ -257,11 +258,11 @@ void Shape::rotate(double theta)
 		for (i = 0; i < 4; i++) {
 			sum = 0;
 			for (k = 0; k < 4; k++) {
-				sum += vertices[j][k] * rotate[k][i];
+				sum += verticesSalvo[j][k] * rotate[k][i];
 			}
 			aux[i] = sum;
 		}
-		vertices[j] = aux;
+		vertices[j] = aux + position;
 		//cout << aux << endl;
 	}
 
@@ -281,32 +282,38 @@ void Shape::rotate(double theta)
 	}
 }
 
+void Shape::reseta() {
+	vertices = verticesSalvo;
+	curvas = curvasSalvo;
+}
+
+Vertex quartenionRotate(double s, Vertex &v, Vertex &r) {
+	return (
+		(r * (s*s))
+		- (r * (v*v))
+		+ (v*(v*r * 2.0)
+		+ ((v ^ r) * s * 2.0)
+	));
+}
+
 void Shape::rotateQ(double theta, int x, int y, int z) {
-	theta = theta / 180.0 * M_PI;
-	//if (x < 0) x = -x;
-	//if (y < 0) y = -y;
-	//if (z < 0) z = -z;
+	theta = (theta / 180.0) * M_PI;
 	pair<double, Vertex> q, q_;
-	q = pair<double, Vertex>(cos(theta / 2), Vertex(x, y, z)*sin(theta / 2));
-	q_ = pair<double, Vertex>(cos(theta / 2), Vertex(x, y, z)*-sin(theta / 2));
-	//position = (
-	//	(position * (q.first*q.first))
-	//	- (position * (q.second*q.second))
-	//	+ (q.second*(q.second*position) * 2.0)
-	//	+ ((q.second % position) * q.first * 2.0)
-	//	);
+	double s;
+	Vertex ve(x, y, z);
+	s = cos(theta / 2);
+	ve = ve * sin(theta / 2);
+
 	int i = 0;
 	for (i = 0; i < v; i++) {
-		cout << i << "antes: " << vertices[i] << endl;
-		vertices[i] = (
-			(verticesSalvo[i] * (q.first*q.first))
-			- (verticesSalvo[i] * (q.second*q.second))
-			+ (q.second*(q.second*verticesSalvo[i]) * 2.0)
-			+ ((q.second % verticesSalvo[i]) * q.first * 2.0)
-		);
-		cout << i << "depois: " << vertices[i] << endl;
+		vertices[i] = quartenionRotate(s, ve, vertices[i]) + position;
 	}
-
+	for (auto it = curvasSalvo.begin(); it != curvasSalvo.end(); it++) {
+		curvas[it->first] = pair<Vertex, Vertex>(
+			quartenionRotate(s, ve, it->second.first) + position,
+			quartenionRotate(s, ve, it->second.second) + position
+		);
+	}
 }
 
 void Shape::rotate(double thetaX, double thetaY, double thetaZ){
@@ -375,7 +382,8 @@ void Shape::setPosition(double x, double y)
 
 void Shape::hider(double x, double y, double z, bool islight)
 {
-	int v0, v1, v2, p0x, p0y, p0z, p1x, p1y, p1z, px, py, pz, V;
+	double p0x, p0y, p0z, p1x, p1y, p1z, px, py, pz, V;
+	int v0, v1, v2;
 	Vertex p0, p1;
 	Vertex N, p;
 	Vertex coor(x, y, z);
@@ -416,9 +424,11 @@ void Shape::hider(double x, double y, double z, bool islight)
 		//cout << "p0 " << p0 << endl;
 		//cout << "p1 " << p1 << endl;
 		N = p0 ^ p1;
-		p = (vertices[v0] + position -coor);
+		//p = (vertices[v0] + position -coor);
+		p = (vertices[v0] -coor);
 		//cout << p << endl;
-		p = vertices[v0] + position - coor;
+		p = vertices[v0] - coor;
+		//p = vertices[v0] + position - coor;
 		V = N * p;
 		if (!islight) {
 			if (V >= 0) {
@@ -478,16 +488,31 @@ void Shape::slide(double tam)
 {
 	int i, j, ver = v, fac = f, edg = e;
 	for (i = 0; i < ver; i++) {
-		addVertex(vertices[i].x + position.x , vertices[i].y + position.y);
+		addVertex(vertices[i].x, vertices[i].y);
+		//addVertex(vertices[i].x + position.x , vertices[i].y + position.y);
 
 		vertices[i + ver].scale = vertices[i].scale;
-		vertices[i + ver].z = tam - position.z;
-		verticesSalvo[i + ver].z = tam - position.z;
+		vertices[i + ver].z = tam;
+		//vertices[i + ver].z = tam - position.z;
+		verticesSalvo[i + ver].z = tam;
+		//verticesSalvo[i + ver].z = tam - position.z;
 	}
+
 	for (i = 0; i < edg; i++) {
-		addEdge(edges[i].first + 10, edges[i].second + 10);
-		if (curvas.find(i) != curvas.end()) {
+		addEdge(edges[i].first + 8, edges[i].second + 8);
+		if (curvasSalvo.find(i) != curvasSalvo.end()) {
+			curvasSalvo[e - 1] = curvasSalvo[i];
 			curvas[e - 1] = curvas[i];
+
+			curvasSalvo[e - 1].first = curvasSalvo[e - 1].second;
+			curvasSalvo[e - 1].second = curvasSalvo[i].first;
+			curvas[e - 1].first = curvas[e - 1].second;
+			curvas[e - 1].second = curvas[i].first;
+			
+			curvasSalvo[e - 1].first.z = tam - position.z;
+			curvasSalvo[e - 1].second.z = tam - position.z;
+			curvas[e - 1].first.z = tam - position.z;
+			curvas[e - 1].second.z = tam - position.z;
 		}
 	}
 
@@ -497,7 +522,7 @@ void Shape::slide(double tam)
 	for (i = 0; i < fac; i++) {
 		arestas.clear();
 		for (auto it2 = faces[i].edges.begin(); it2 != faces[i].edges.end(); ++it2) {
-			arestas.push_back(*it2 + 10);
+			arestas.push_back(*it2 + 8);
 		}
 		std::reverse(arestas.begin(), arestas.end());
 		addFace(arestas, 900);
@@ -505,19 +530,28 @@ void Shape::slide(double tam)
 	
 
 	
-	int c = 20;
-	addEdge(0, 0 + 10);
+	int c = 16;
+	addEdge(0, 0 + 8);
 	for (i = 1; i < ver; ++i) {
 		//addEdge(i - 1, i + 10);
-		addEdge(i, i + 10);
-
+		addEdge(i, i + 8);
+		
 		arestas.clear();
-		arestas.push_back(c);
-		arestas.push_back(i - 1);
-		arestas.push_back(c + 1);
-		arestas.push_back(i + 9);
+		if (i == ver - 1) {
+			arestas.push_back(i + 7);
+			arestas.push_back(c + 1);
+			arestas.push_back(i - 1);
+			arestas.push_back(c);
+		}
+		else {
+			arestas.push_back(c);
+			arestas.push_back(i - 1);
+			arestas.push_back(c + 1);
+			arestas.push_back(i + 7);
+		}
+	
 		addFace(arestas, 900);
-
+		
 		c += 1;
 		/*
 		arestas.clear();
@@ -529,7 +563,7 @@ void Shape::slide(double tam)
 		c += 1;
 		*/
 	}
-	arestas = { 9, 20, 19, 29 };
+	arestas = { 7, 16, 15, 23 };
 	addFace(arestas, 900);
 	/*
 	addEdge(9, 10);
@@ -548,30 +582,38 @@ void Shape::slide(double tam)
 	iter_swap(faces.begin(), faces.end()-1);
 }
 
+void projectionMult(vector<vector<double>> &projc, Vertex &v) {
+	vector<double> temp = { 0, 0, 0, 0 };
+	for (int i = 0; i < 4; i++) {
+		double sum = 0;
+		for (int k = 0; k < 4; k++) {
+			//cout << k << " " << j << " " << projc[k][i] << " projection" << endl;
+			sum += v[k] * projc[k][i];
+		}
+		temp[i] = sum;
+	}
+	v.x = temp[0];
+	v.y = temp[1];
+	v.z = temp[2];
+	v.scale = temp[3];
+}
+
 void Shape::projection(double theta)
 {
-	degree = M_PI * theta / 180;
-	/*
+	degree = M_PI * (theta / 180.0);
+	//*
 	double cosT = cos(degree), sinT = sin(degree), sum = 0;
 	int i, j, k;
 	vector<vector<double>> projc = { {1, 0, 0, 0},
 									 {0, 1, 0, 0},
 									 {cosT, sinT, 0, 0},
 									 {0, 0, 0, 1} };
-	vector<double> temp = { 0, 0, 0, 0 };
 	for (j = 0; j < v; j++) {
-		for (i = 0; i < 4; i++) {
-			sum = 0;
-			for (k = 0; k < 4; k++) {
-				//cout << k << " " << j << " " << projc[k][i] << " projection" << endl;
-				sum += vertices[j][k] * projc[k][i];
-			}
-			temp[i] = sum;
-		}
-		vertices[j].x = temp[0];
-		vertices[j].y = temp[1];
-		vertices[j].z = temp[2];
-		vertices[j].scale = temp[3];
+		projectionMult(projc, vertices[j]);
+	}
+	for (auto it = curvas.begin(); it != curvas.end(); it++) {
+		projectionMult(projc, it->second.first);
+		projectionMult(projc, it->second.second);
 	}
 	//*/
 }
@@ -600,22 +642,6 @@ void Shape::printShape(SDL_Renderer* renderer, int width, int height)
 //*/
 
 
-
-
-
-
-
-
-
-
-int Shape::convertWidth(double x, int width, int height) {
-	return (int)(((x + position.x * position.scale) * width) / this->width);
-}
-
-
-int Shape::convertHeight(double y, int width, int height) {
-	return (int)(((y + position.y * position.scale) * -height) / this->height + height);
-}
 
 int _gfxPrimitivesCompareInt(const void *a, const void *b)
 {
@@ -815,9 +841,10 @@ void Shape::printShape(SDL_Renderer* renderer, int width, int height, int mode) 
 		if (faces[fa].isVisible) {
 			//cout << "entrou" << endl;
 			vector<Vertex> novo = sortFace(faces[fa]);
+
 			Vertex ultimo = novo[novo.size() - 1];
 
-			int tam = novo.size();
+			int tam = (int)novo.size();
 			Sint16 *vx = new Sint16[tam];
 			Sint16 *vy = new Sint16[tam];
 
@@ -825,10 +852,14 @@ void Shape::printShape(SDL_Renderer* renderer, int width, int height, int mode) 
 			for (int i = 0; i < novo.size(); i++) {
 				Vertex &atual = novo[i];
 				//*
-				Xdi = (int)((((ultimo.x + ultimo.z * cos(degree)) + position.x * position.scale) * width) / this->width);
-				Ydi = (int)((((ultimo.y + ultimo.z * sin(degree)) + position.y * position.scale) * -height) / this->height + height);
-				Xdf = (int)((((atual.x + atual.z * cos(degree)) + position.x * position.scale) * width) / this->width);
-				Ydf = (int)((((atual.y + atual.z * sin(degree)) + position.y * position.scale) * -height) / this->height + height);
+				//Xdi = (int)((((ultimo.x + ultimo.z * cos(degree)) + position.x * position.scale) * width) / this->width);
+				//Ydi = (int)((((ultimo.y + ultimo.z * sin(degree)) + position.y * position.scale) * -height) / this->height + height);
+				//Xdf = (int)((((atual.x + atual.z * cos(degree)) + position.x * position.scale) * width) / this->width);
+				//Ydf = (int)((((atual.y + atual.z * sin(degree)) + position.y * position.scale) * -height) / this->height + height);
+				Xdi = (int)((((ultimo.x) * ultimo.scale) * width) / this->width);
+				Ydi = (int)((((ultimo.y) * ultimo.scale) * -height) / this->height + height);
+				Xdf = (int)((((atual.x) * atual.scale) * width) / this->width);
+				Ydf = (int)((((atual.y) * atual.scale) * -height) / this->height + height);
 
 
 				//*/
@@ -854,29 +885,23 @@ void Shape::printShape(SDL_Renderer* renderer, int width, int height, int mode) 
 				}
 				ultimo = atual;
 			}
-		
+
 			if (mode != WIRE_FRAME) {
-				int r, g, b;
+				int r = 0, g = 0, b = 0;
 				if (faces[fa].isLighted && mode == SOLID_WITH_LIGHT) {
 					//cout << "Iluminado " << fa << endl;
-					r = 255 * faces[fa].seno;
-					g = 127 * faces[fa].seno;
-					b = 0;
+					r = (int)(255 * faces[fa].seno);
+					g = (int)(127 * faces[fa].seno);
+					b = (int)0;
 					
 					//SDL_SetRenderDrawColor(renderer,, , 0, SDL_ALPHA_OPAQUE);//cosseno disfarcado
 					//cout <<"face: " << fa << " islight: " << faces[fa].seno << endl;
 				}
 				else {
 					//cout << "Apagado " << fa << endl;
-					
-					r = faces[fa].color % 100;
-					if (r > 9) { r = 9; }
-					g = faces[fa].color % 10 - r * 10;
-					b = faces[fa].color - g * 10;
-
-					r = 255 * r / 9;
-					g = 255 * g / 9;
-					b = 255 * b / 9;
+					r = (int)(255 * r / 9);
+					g = (int)(255 * g / 9);
+					b = (int)(255 * b / 9);
 					//SDL_SetRenderDrawColor(renderer,, , , SDL_ALPHA_OPAQUE);
 				}
 				Uint32 color = 0;
@@ -885,6 +910,7 @@ void Shape::printShape(SDL_Renderer* renderer, int width, int height, int mode) 
 
 			}
 		}
+
 	}
 }
 
@@ -982,24 +1008,31 @@ vector<Vertex> Shape::sortFace(Face poly) {
 			p2 = vertices[edges[poly.edges[i]].first];
 			vertic = edges[poly.edges[i]].first;
 		}
-
 		if (curvas.find(poly.edges[i]) != curvas.end()) {
-			Vertex t1 = curvas[poly.edges[i]].first + position;
-			Vertex t2 = curvas[poly.edges[i]].second + position;
+			//Vertex t1 = curvas[poly.edges[i]].first + position;
+			//Vertex t2 = curvas[poly.edges[i]].second + position;
+			Vertex t1 = curvas[poly.edges[i]].first;
+			Vertex t2 = curvas[poly.edges[i]].second;
 			for (int t = 0; t <= steps; t++) {
 				double s = (double)t / (double)steps;
+				double s1 = 1 - s;
+				/*
+
 				double h1 = - s*s*s + 3 * s*s -3 *s + 1;
 				double h2 = 3 * s*s*s - 6 * s*s +3 *s;
 				double h3 = -3 * s*s*s + 3 * s*s;
 				double h4 = 3 * s*s*s;
-				/*
 				double h1 = 2 * s*s*s - 3 * s*s + 1;
 				double h2 = -2 * s*s*s + 3 * s*s;
 				double h3 = s * s*s - 2 * s*s + s;
 				double h4 = s * s*s - s * s;
-				//*/
-				Vertex p = p1 * h1 + p2 * h2 + t1 * h3 + t2 * h4;
-				p.z = p1.z;
+				
+				//
+				Vertex p = p1 * h1 + p2 * h2 + t2 * h3 + t1 * h4;
+				*/
+				//
+				Vertex p = p1 * s1*s1*s1 + t1 * 3 * s1*s1*s + t2 * 3 * s1*s*s + p2 * s*s*s;
+				//p.z = p1.z;
 				vertics.push_back(p);
 				//cout << poly.edges[i] << " interpolado " << p << endl;
 			}
@@ -1012,516 +1045,5 @@ vector<Vertex> Shape::sortFace(Face poly) {
 
 	}
 	vertics.push_back(vertices[primeiro]);
-
-	/*
-	vector<Vertex> vertics;
-	int steps = 30;
-	int vertic;
-	if (edges[poly.edges[0]].first == edges[poly.edges[1]].first) {
-		vertics.push_back(vertices[edges[poly.edges[0]].second]);
-		vertics.push_back(vertices[edges[poly.edges[0]].first]);
-		vertic = edges[poly.edges[0]].first;
-	}
-	else if (edges[poly.edges[0]].first == edges[poly.edges[1]].second) {
-		vertics.push_back(vertices[edges[poly.edges[0]].second]);
-		vertics.push_back(vertices[edges[poly.edges[0]].first]);
-		vertic = edges[poly.edges[0]].first;
-	}
-	else if (edges[poly.edges[0]].second == edges[poly.edges[1]].first) {
-		vertics.push_back(vertices[edges[poly.edges[0]].first]);
-		vertics.push_back(vertices[edges[poly.edges[0]].second]);
-		vertic = edges[poly.edges[0]].second;
-	}
-	else {
-		vertics.push_back(vertices[edges[poly.edges[0]].first]);
-		vertics.push_back(vertices[edges[poly.edges[0]].second]);
-		vertic = edges[poly.edges[0]].second;
-	}
-
-	for (int i = 1; i < poly.edges.size(); i++) {
-		Vertex atual;
-
-		if (vertic == edges[poly.edges[i]].first) {
-			atual = vertices[edges[poly.edges[i]].second];
-			vertic = edges[poly.edges[i]].second;
-		}
-		else {
-			atual = vertices[edges[poly.edges[i]].first];
-			vertic = edges[poly.edges[i]].first;
-		}
-
-		if (curvas.find(poly.edges[i]) != curvas.end()) {
-			cout << "atual " << atual << " vertic " << vertices[vertic] << endl;
-			Vertex t1 = curvas[poly.edges[i]].first;
-			Vertex t2 = curvas[poly.edges[i]].second;
-			for (int t = 0; t <= steps; t++) {
-				double s = (double)t / (double)steps;
-				double h1 = 2 * s*s*s - 3 * s*s + 1;
-				double h2 = -2 * s*s*s + 3 * s*s;
-				double h3 = s*s*s - 2 * s*s + s;
-				double h4 = s*s*s - s*s;
-				Vertex p = atual * h1 + vertices[vertic] * h2 + t1 * h3 + t2 * h4;
-				vertics.push_back(p);
-				cout << poly.edges[i] <<" interpolado " << p << endl;
-			}
-		}
-		else {
-			vertics.push_back(atual);
-			cout << "padrao " << atual << endl;
-		}
-		
-	}//*/
 	return vertics;
 }
-
-
-
-
-//int k = 0;
-//vector<vector<EdgeBucket>> divs;
-
-//int cindex = 0;
-//vector<int> ET; // Edge Table
-//map<int, EdgeBucket> mapa;
-
-/*
-		std::sort(ET.begin(), ET.end(),
-			[&](const int& a, const int& b) {
-			return mapa[a].yMin < mapa[b].yMin;
-			});
-		for (int i = 0; i < ET.size(); i++) {
-			cout << "face: " << fa << " " << mapa[ET[i]].yMin << " " << mapa[ET[i]].yMax << " " << mapa[ET[i]].xofymin << endl;
-		}*/
-/*
-					if (Ydi != Ydf) {
-						addToBucket(cindex, mapa, ET, Xdi, Ydi, Xdf, Ydf);
-					}*/
-/*
-				int y = mapa[ET[0]].yMin;
-				vector<int> AL; // Active List
-
-				while (!ET.empty()) {
-					vector<int> ALu;
-					for (int i = 0; i < AL.size(); i++) {
-						if (y != mapa[AL[i]].yMax) {
-							ALu.push_back(AL[i]);
-						}
-						else {
-							ET.erase(remove(ET.begin(), ET.end(), AL[i]), ET.end());
-						}
-					}
-					AL = ALu;
-
-					for (int i = 0; i < ET.size(); i++) {
-						if (y != mapa[ET[i]].yMin) {
-							AL.push_back(ET[i]);
-						}
-					}
-
-					std::sort(AL.begin(), AL.end(),
-						[&](const int& a, const int& b) {
-						if (mapa[a].xofymin < mapa[b].xofymin) {
-							return true;
-						}
-						else if (mapa[a].xofymin == mapa[b].xofymin) {
-							return mapa[a].slopeinverse > mapa[b].slopeinverse;
-						}
-						else {
-							return false;
-						}
-					});
-					int tam = AL.size();
-
-					int j = 0;
-					int FillFlag = 0;
-					int coordCount = 0;
-					int x1 = 0;
-					int x2 = 0;
-					int ymax1 = 0;
-					int ymax2 = 0;
-
-					while (j < tam) {
-						if (coordCount % 2 == 0) {
-							x1 = (int)mapa[AL[j]].xofymin;
-							ymax1 = (int)mapa[AL[j]].yMax;
-							if (x1 == x2) {
-								if (((x1 == ymax1) && (x2 != ymax2)) || ((x1 != ymax1) && (x2 == ymax2))){
-									x2 = x1;
-									ymax2 = ymax1;
-								}else{
-									coordCount++;
-								}
-							}
-							else {
-								coordCount++;
-							}
-						}
-						else {
-							x2 = (int)mapa[AL[j]].xofymin;
-							ymax2 = mapa[AL[j]].yMax;
-
-							FillFlag = 0;
-
-							// checking for intersection...
-							if (x1 == x2)
-							{
-
-								if (((x1 == ymax1) && (x2 != ymax2)) || ((x1 != ymax1) && (x2 == ymax2)))
-								{
-									x1 = x2;
-									ymax1 = ymax2;
-								}
-								else
-								{
-									coordCount++;
-									FillFlag = 1;
-								}
-							}
-							else
-							{
-								coordCount++;
-								FillFlag = 1;
-							}
-
-							if (FillFlag)
-							{
-								SDL_RenderDrawLine(
-									renderer,
-									x1, y,
-									x2, y
-								);
-
-								// printf("\nLine drawn from %d,%d to %d,%d",x1,i,x2,i);
-							}
-
-						}
-
-						j++;
-
-					}
-
-					for (int i = 0; i < tam - 1; i++) {
-
-					}
-					for (int i = 0; i < AL.size(); i++) {
-						mapa[AL[i]].xofymin += mapa[AL[i]].slopeinverse;
-					}
-					y++;
-
-
-				}*/
-/*
-				if (fa == 0 || fa == faces.size() - 1)
-				{
-					int i = edges[faces[fa].edges[0]].first, j = i;
-					k = 3;
-					ET.clear();
-					while (k> 0) {
-						Xdi = (int)(((this->x(i) + position.x * position.scale) * width) / this->width);
-						Ydi = (int)(((this->y(i) + position.y * position.scale) * -height) / this->height + height);
-						Xdf = (int)(((this->x(j) + position.x * position.scale) * width) / this->width);
-						Ydf = (int)(((this->y(j) + position.y * position.scale) * -height) / this->height + height);
-						ET.push_back(addToBucket(Xdi, Ydi, Xdf, Ydf));
-						if (k == 14) { j = i + 2; i += 9; }
-						if (k == 13) { j = i; i--; }
-						if (k == 12) { j = i; i--; }
-						if (k == 11) {
-							divs.push_back(ET);
-							ET.clear();
-							j += 9; i ++;
-						}
-						if (k == 10) { i = j; j--; }
-						if (k == 9) { i--; j--; }
-						if (k == 8) { i--; j--; }
-						if (k == 7) { i = j; j -= 3; }
-						if (k == 6) { i = j; j--; }
-						if (k == 5) {
-							divs.push_back(ET);
-							ET.clear();
-							j += 4; }
-						if (k == 4) { i = j; j--; }
-						if (k == 3) { i--; j--; }
-						if (k == 2) { i--; j--; }
-						if (k == 1) {
-							divs.push_back(ET);
-							ET.clear();
-						}
-						k--;
-					}
-					k = 3;
-				}
-				//*/
-/*
-				Vertex va0 = vertices[edges[faces[fa].edges[0]].first];
-				Vertex va1 = vertices[edges[faces[fa].edges[0]].second];
-				Vertex vb0 = vertices[edges[faces[fa].edges[1]].first];
-				Vertex vb1 = vertices[edges[faces[fa].edges[1]].second];
-				vector<double> ys = {
-					va0.y,
-					va1.y,
-					vb0.y,
-					vb1.y
-				};
-				double yMin = *min_element(ys.begin(), ys.end());
-				double yMax = *max_element(ys.begin(), ys.end());
-
-				int yiMin = convertHeight(yMin, width, height);
-				int yiMax = convertHeight(yMax, width, height);
-
-
-				for (int yi = yiMax; yi <= yiMin; yi++) {
-					double y = yMax + (double)(yi - yiMin) / (yiMax - yiMin) * (yMax - yMin);
-					vector<double> xs = {
-						va0.x * y / va0.y,
-						va1.x * y / va1.y,
-						vb0.x * y / vb0.y,
-						vb1.x * y / vb1.y
-					};
-					int xMin = convertWidth(*min_element(xs.begin(), xs.end()), width, height);
-					int xMax = convertWidth(*max_element(xs.begin(), xs.end()), width, height);
-
-					//cout << AL[i].x << endl;
-					SDL_RenderDrawLine(
-						renderer,
-						xMin, yi,
-						xMax, yi
-					);
-				}
-				*/
-
-				/*
-								while (k >= 0) {
-									if (k > 0) { ET.swap(divs[k-1]); }
-
-									int y = ET[0].yMin;
-									while (!ET.empty()) {
-										if (!AL.empty()) {
-											int i = 0;
-											int j = AL.size();
-											while (i < j) {
-												if (AL[i].yMax == y) {
-													AL.erase(AL.begin() + i);
-													j--;
-												}
-												else { i++; }
-											}
-											i = 0;
-											j = ET.size();
-											while (i < j) {
-												if (ET[i].yMax == y) {
-													ET.erase(ET.begin() + i);
-													j--;
-												}
-												else { i++; }
-											}
-										}
-										for (int i = 0; i < ET.size(); ++i) {
-											if (ET[i].yMin == y)
-											{
-												AL.push_back(ET[i]);
-												AL[AL.size() - 1].key = AL[AL.size() - 1].x;
-											}
-										}
-										std::sort(AL.begin(), AL.end());
-										//cout << AL.size() << endl;
-										int tam = AL.size();
-										for (int i = 0; i < tam - 1; i++) {
-											//cout << AL[i].x << endl;
-											SDL_RenderDrawLine(
-												renderer,
-												AL[i].x, y,
-												AL[i + 1].x, y
-											);
-										}
-										for (int i = 0; i < AL.size(); ++i) {
-											if (AL[i].dx != 0) {
-												AL[i].sum += AL[i].dx;
-											}
-											while (AL[i].sum >= AL[i].dy) {
-												AL[i].x += AL[i].sign;
-												AL[i].sum -= AL[i].dy;
-											}
-										}
-										y++;
-									}
-									if (k == 1) { k--; }
-								k--;
-								}
-								*/
-/*
-for (auto edge = faces[fa].edges.begin(); edge != faces[fa].edges.end(); ++edge) {
-	//cout << (*edge) << endl;
-	Xdi = (int)(((this->x(edges[*edge].first) + position.x * position.scale) * width) / this->width);
-	Ydi = (int)(((this->y(edges[*edge].first) + position.y * position.scale) * -height) / this->height + height);
-	Xdf = (int)(((this->x(edges[*edge].second) + position.x * position.scale) * width) / this->width);
-	Ydf = (int)(((this->y(edges[*edge].second) + position.y * position.scale) * -height) / this->height + height);
-	//cout << Xdi << " " << Ydi << " " << Xdf << " " << Ydf << endl;
-	if(mode != WIRE_FRAME)
-	{
-		if (Ydi != Ydf) {
-			ET.push_back(addToBucket(Xdi, Ydi, Xdf, Ydf));
-		}
-	}
-	if (mode == WIRE_FRAME)
-	{
-		SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE); // ... (renderer, r, g, b, alpha)
-		SDL_RenderDrawLine(
-			renderer,
-			Xdi, Ydi,
-			Xdf, Ydf
-		);
-	}
-}*/
-
-/*
-
-bool Shape::DrawFilledPolygon(Face poly, SDL_Renderer* renderer) {
-	int topY;            // used to hold the y coordinate of the top vertex
-	int topCnt;            // used to hold the index of the top vertex
-	int leftCnt;            // used to hold the index of the vertex left of the top vertex
-	int rightCnt;           // used to hold the index of the vertex right of the top vertex
-	int startX;            // Starting point to draw the line, uses FP math
-	int endX;            // ending point to draw the line, uses FP math
-	int cntY;            // y position of the current line
-	int leftSlope;              // Slope of the left side, uses FP math
-	int rightSlope;             // Slope of the right side, uses FP math
-	int cnt;            // counting variable used in loops
-	int numVerts; //= poly.GetNumberOfVertices();    // number of vertices in the polygon being drawn, initialize immediately
-	//int numVertsProc = 1;           // number of vertices that have been processed, initialize to 1
-	Vertex vety;
-	vector<Vertex> vertics;
-	int vertic;
-	if (edges[poly.edges[0]].first == edges[poly.edges[1]].first) {
-		vertics.push_back(vertices[edges[poly.edges[0]].second]);
-		vertics.push_back(vertices[edges[poly.edges[0]].first]);
-		vertic = edges[poly.edges[0]].first;
-	}
-	else if (edges[poly.edges[0]].first == edges[poly.edges[1]].second) {
-		vertics.push_back(vertices[edges[poly.edges[0]].second]);
-		vertics.push_back(vertices[edges[poly.edges[0]].first]);
-		vertic = edges[poly.edges[0]].first;
-	}
-	else if (edges[poly.edges[0]].second == edges[poly.edges[1]].first) {
-		vertics.push_back(vertices[edges[poly.edges[0]].first]);
-		vertics.push_back(vertices[edges[poly.edges[0]].second]);
-		vertic = edges[poly.edges[0]].second;
-	}
-	else {
-		vertics.push_back(vertices[edges[poly.edges[0]].first]);
-		vertics.push_back(vertices[edges[poly.edges[0]].second]);
-		vertic = edges[poly.edges[0]].second;
-	}
-
-	for (int i = 1; i < poly.edges.size(); i++) {
-		if (vertic == edges[poly.edges[i]].first) {
-			vertics.push_back(vertices[edges[poly.edges[i]].second]);
-			vertic = edges[poly.edges[i]].second;
-		}
-		else {
-			vertics.push_back(vertices[edges[poly.edges[i]].first]);
-			vertic = edges[poly.edges[i]].first;
-		}
-		vety = vertics[i] + position;
-		cout << vety << position << endl;
-	}
-
-	
-
-	/*
-	int key;
-	std::string stringValue;
-	EdgeBucket(int k, const std::string& s) : key(k), stringValue(s) {}
-	bool operator < (const EdgeBucket& str) const
-	{
-		return (key < str.key);
-	}
-	EdgeBucket();
-	
-
-
-	
-	Point center = poly.GetCenter();
-	Point *verts = poly.GetVertices();      // Vertex information of the polygon
-
-	topY = verts[0].y;          // Initialize the top y coordinate to the first point
-	topCnt = 0;            // set to top point to 0
-
-	// assumes points in counterclockwise order
-	// find the true top point
-	for (cnt = 1; cnt < numVerts; cnt++)      // for all the vertices in the polygon
-	{
-		if (verts[cnt].y < topY)        // if vertex of the current vertex is above the top vertex
-		{
-			topY = verts[cnt].y;        // set the top vertex to the current vertex
-			topCnt = cnt;           // set the reference number of the top vertex
-		}
-	}
-
-	// find point to left
-	leftCnt = topCnt - 1;           // set the left point to one less than the top point
-	if (leftCnt < 0)             // if the left vertex specified is less than 0
-		leftCnt = numVerts - 1;        // set the left vertex to the top vertex
-
-	// find point to right
-	rightCnt = topCnt + 1;          // set the right vertex to one more than the top vertex
-	if (rightCnt >= numVerts)        // if the right vertex specified is more than the number of vertices
-		rightCnt = 0;          // set it equal to 0
-
-	startX = endX = (verts[topCnt].x + center.x) << 16;  // set the starting and ending points of the line
-	cntY = verts[topCnt].y;         // set the first y value to draw at
-
-	if (verts[leftCnt].y != verts[topCnt].y)     // if the top and left vertex do not have the same y value
-		leftSlope = ((verts[leftCnt].x - verts[topCnt].x) << 16) / (verts[leftCnt].y - verts[topCnt].y);    // find the left side slope
-	if (verts[rightCnt].y != verts[topCnt].y)    // if the top and right vertex do not have the same y value
-		rightSlope = ((verts[rightCnt].x - verts[topCnt].x) << 16) / (verts[rightCnt].y - verts[topCnt].y); // find the right side slope
-
-	SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
-
-	// find slopes
-	while (numVertsProc < numVerts)          // if there remain vertices to be processed
-	{
-		// rasterize to first point
-		while (cntY < verts[leftCnt].y && cntY < verts[rightCnt].y)  // while one of the two side points hasn't been reached yet
-		{
-			SDL_RenderDrawLine(renderer, startX >> 16, cntY + center.y, endX >> 16, cntY + center.y);
-			//DrawLine(Point(startX >> 16, cntY + center.y), Point(endX >> 16, cntY + center.y), col);  // draw a line between the sides
-			cntY++;             // increment the y position by 1
-			startX += leftSlope;        // increase the starting x value by the left slope
-			endX += rightSlope;        // increase the ending x value by the right slope
-		}
-		// set top point to point met
-		// set point met to next point
-		// find new slope
-		if (verts[leftCnt].y <= cntY)      // if the raster line passes the left coordinate
-		{
-			topCnt = leftCnt;        // set the top point to the left side
-			leftCnt--;          // decrement the left point
-			if (leftCnt < 0)         // if the left point is less than zero
-				leftCnt = numVerts - 1;      // wrap around
-			if (verts[leftCnt].y != verts[topCnt].y)     // if the top and new left vertex do not have the same y value
-				leftSlope = ((verts[leftCnt].x - verts[topCnt].x) << 16) / (verts[leftCnt].y - verts[topCnt].y);    // find the left side slope
-
-			startX = (verts[topCnt].x + center.x) << 16;    // set the starting x position
-			numVertsProc++;         // increment the number of vertices processed
-		}
-
-		if (verts[rightCnt].y <= cntY)      // if the raster line passes the right coordinate
-		{
-			topCnt = rightCnt;        // set the top point to the right side
-			rightCnt++;          // increment the right point
-			if (rightCnt == numVerts)      // if the right point is more than the number of vertices
-				rightCnt = 0;        // set the right point to zero
-			if (verts[rightCnt].y != verts[topCnt].y)  // if the top and new right vertex do not have the same y value
-				rightSlope = ((verts[rightCnt].x - verts[topCnt].x) << 16) / (verts[rightCnt].y - verts[topCnt].y); // find the right side slope
-
-			endX = (verts[topCnt].x + center.x) << 16;  // set the ending x position
-			numVertsProc++;         // increment the number of vertices processed
-		}
-		SDL_RenderDrawLine(renderer, startX >> 16, cntY + center.y, endX >> 16, cntY + center.y);
-		//DrawLine(Point(startX >> 16, cntY + center.y), Point(endX >> 16, cntY + center.y), col); // draw a line between the sides 
-	}
-	// continue until the number of vertices p0 has touched == number of vertices
-	
-	return true;            // return success
-}
-*/

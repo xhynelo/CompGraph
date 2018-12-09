@@ -57,6 +57,7 @@ class Shape
 	vector<Vertex> verticesSalvo;
 	vector<pair<int, int>> edges;
 	map<int, pair<Vertex, Vertex>> curvas;
+	map<int, pair<Vertex, Vertex>> curvasSalvo;
 	//number of elements on the above arrays
 	int v = 0, e = 0, f = 0;
 	//int XDmin = -1, YDmin = -1, XDMAX = 0, YDMAX = 0;
@@ -75,7 +76,7 @@ class Shape
 		double y(int n);
 		double z(int n);
 		double getV();
-		double degree = 0;
+		double degree = 0.0;
 
 		vector<vector<double>> matrix;
 		
@@ -103,6 +104,7 @@ class Shape
 		bool DrawFilledPolygon(Face poly, SDL_Renderer* renderer);
 		double minVertex();
 		void curva();
+		void reseta();
 
 
 		vector<Vertex> sortFace(Face poly);
