@@ -91,6 +91,7 @@ class Shape
 		void translade(double x, double y);
 		void rotate(double theta);
 		void rotateQ(double theta, int x, int y, int z);
+		void rotateQ1(double theta, int x, int y, int z);
 		void rotate(double thetaX, double thetaY, double thetaZ);
 		void setPosition(double x, double y);
 		void hider(double x, double y, double z, bool islight);
@@ -105,7 +106,7 @@ class Shape
 		double minVertex();
 		void curva();
 		void reseta();
-
+		pair<double,Vertex> multQuaternion(double s1, Vertex v1, double s2, Vertex v2);
 
 		vector<Vertex> sortFace(Face poly);
 

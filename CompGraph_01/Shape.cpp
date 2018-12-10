@@ -262,7 +262,8 @@ void Shape::rotate(double theta)
 			}
 			aux[i] = sum;
 		}
-		vertices[j] = aux + position;
+		vertices[j] = aux;
+		//vertices[j] = aux + position;
 		//cout << aux << endl;
 	}
 
@@ -306,13 +307,32 @@ void Shape::rotateQ(double theta, int x, int y, int z) {
 
 	int i = 0;
 	for (i = 0; i < v; i++) {
-		vertices[i] = quartenionRotate(s, ve, vertices[i]) + position;
+		vertices[i] = quartenionRotate(s, ve, vertices[i]);
+		//vertices[i] = quartenionRotate(s, ve, vertices[i]) + position;
 	}
 	for (auto it = curvasSalvo.begin(); it != curvasSalvo.end(); it++) {
 		curvas[it->first] = pair<Vertex, Vertex>(
-			quartenionRotate(s, ve, it->second.first) + position,
-			quartenionRotate(s, ve, it->second.second) + position
+			//quartenionRotate(s, ve, it->second.first) + position,
+			//quartenionRotate(s, ve, it->second.second) + position
+			quartenionRotate(s, ve, it->second.first),
+			quartenionRotate(s, ve, it->second.second)
 		);
+	}
+}
+
+void Shape::rotateQ1(double theta, int x, int y, int z) {
+	double s;
+	Vertex ve(x, y, z);
+	s = theta;
+	int i;
+	for (i = 0; i < v; i++) {
+		vertices[i] = quartenionRotate(s, ve, vertices[i]);
+	}
+	for (auto it = curvasSalvo.begin(); it != curvasSalvo.end(); it++) {
+		curvas[it->first] = pair<Vertex, Vertex>(
+			quartenionRotate(s, ve, it->second.first),
+			quartenionRotate(s, ve, it->second.second)
+			);
 	}
 }
 
@@ -856,10 +876,10 @@ void Shape::printShape(SDL_Renderer* renderer, int width, int height, int mode) 
 				//Ydi = (int)((((ultimo.y + ultimo.z * sin(degree)) + position.y * position.scale) * -height) / this->height + height);
 				//Xdf = (int)((((atual.x + atual.z * cos(degree)) + position.x * position.scale) * width) / this->width);
 				//Ydf = (int)((((atual.y + atual.z * sin(degree)) + position.y * position.scale) * -height) / this->height + height);
-				Xdi = (int)((((ultimo.x) * ultimo.scale) * width) / this->width);
-				Ydi = (int)((((ultimo.y) * ultimo.scale) * -height) / this->height + height);
-				Xdf = (int)((((atual.x) * atual.scale) * width) / this->width);
-				Ydf = (int)((((atual.y) * atual.scale) * -height) / this->height + height);
+				Xdi = (int)((((ultimo.x + position.x) * ultimo.scale) * width) / this->width);
+				Ydi = (int)((((ultimo.y + position.y) * ultimo.scale) * -height) / this->height + height);
+				Xdf = (int)((((atual.x + position.x) * atual.scale) * width) / this->width);
+				Ydf = (int)((((atual.y + position.y) * atual.scale) * -height) / this->height + height);
 
 
 				//*/
@@ -1046,4 +1066,16 @@ vector<Vertex> Shape::sortFace(Face poly) {
 	}
 	vertics.push_back(vertices[primeiro]);
 	return vertics;
+}
+
+
+pair<double, Vertex>  Shape::multQuaternion(double s1, Vertex v1, double s2, Vertex v2) {
+	s1 = cos(((s1 / 180) * M_PI) / 2.0);
+	s2 = cos(((s2 / 180) * M_PI) / 2.0);
+	v1 = v1 * sin(s1);
+	v2 = v2 * sin(s2);
+	double angulo = (s1 * s2) - (v2 * v1);
+	Vertex vetor = (v1 * s2) + (v2 * s1) + (v2 ^ v1);
+	return pair<double, Vertex>(angulo, vetor);
+
 }
